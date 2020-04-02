@@ -1,0 +1,257 @@
+1 Market and Exchange Names
+
+2 As of Date in Form YYMMDD
+
+3 As of Date in Form YYYY-MM-DD
+
+4 CFTC Contract Market Code
+
+5 CFTC Market Code in Initials
+
+6 CFTC Region Code
+
+7 CFTC Commodity Code
+
+8 Open Interest (All)
+
+9 Noncommercial Positions-Long (All)
+
+10 Noncommercial Positions-Short (All)
+
+11 Noncommercial Positions-Spreading (All)
+
+12 Commercial Positions-Long (All)
+
+13 Commercial Positions-Short (All)
+
+14 Total Reportable Positions-Long (All)
+
+15 Total Reportable Positions-Short (All)
+
+16 Nonreportable Positions-Long (All)
+
+17 Nonreportable Positions-Short (All)
+
+18 Open Interest (Old)
+
+19 Noncommercial Positions-Long (Old)
+
+20 Noncommercial Positions-Short (Old)
+
+21 Noncommercial Positions-Spreading (Old)
+
+22 Commercial Positions-Long (Old)
+
+23 Commercial Positions-Short (Old)
+
+24 Total Reportable Positions-Long (Old)
+
+25 Total Reportable Positions-Short (Old)
+
+26 Nonreportable Positions-Long (Old)
+
+27 Nonreportable Positions-Short (Old)
+
+28 Open Interest (Other)
+
+29 Noncommercial Positions-Long (Other)
+
+30 Noncommercial Positions-Short (Other)
+
+31 Noncommercial Positions-Spreading(Other)
+
+32 Commercial Positions-Long (Other)
+
+33 Commercial Positions-Short (Other)
+
+34 Total Reportable Positions-Long (Other)
+
+35 Total Reportable Positions-Short (Other)
+
+36 Nonreportable Positions-Long (Other)
+
+37 Nonreportable Positions-Short (Other)
+
+38 Change in Open Interest (All)
+
+39 Change in Noncommercial-Long (All)
+
+40 Change in Noncommercial-Short (All)
+
+41 Change in Noncommercial-Spreading (All)
+
+42 Change in Commercial-Long (All)
+
+43 Change in Commercial-Short (All)
+
+44 Change in Total Reportable-Long (All)
+
+45 Change in Total Reportable-Short (All)
+
+46 Change in Nonreportable-Long (All)
+
+47 Change in Nonreportable-Short (All)
+
+48 % OF Open Interest (OI) (All)
+
+49 % OF OI-Noncommercial-Long (All)
+
+50 % OF OI-Noncommercial-Short (All)
+
+51 % OF OI-Noncommercial-Spreading (All)
+
+52 % OF OI-Commercial-Long (All)
+
+53 % OF OI-Commercial-Short (All)
+
+54 % OF OI-Total Reportable-Long (All)
+
+55 % OF OI-Total Reportable-Short (All)
+
+56 % OF OI-Nonreportable-Long (All)
+
+57 % OF OI-Nonreportable-Short (All)
+
+58 % OF Open Interest (OI) (Old)
+
+59 % OF OI-Noncommercial-Long (Old)
+
+60 % OF OI-Noncommercial-Short (Old)
+
+61 % OF OI-Noncommercial-Spreading (Old)
+
+62 % OF OI-Commercial-Long (Old)
+
+63 % OF OI-Commercial-Short (Old)
+
+64 % OF OI-Total Reportable-Long (Old)
+
+65 % OF OI-Total Reportable-Short (Old)
+
+66 % OF OI-Nonreportable-Long (Old)
+
+67 % OF OI-Nonreportable-Short (Old)
+
+68 % OF Open Interest (OI) (Other)
+
+69 % OF OI-Noncommercial-Long (Other)
+
+70 % OF OI-Noncommercial-Short (Other)
+
+71 % OF OI-Noncommercial-Spreading (Other)
+
+72 % OF OI-Commercial-Long (Other)
+
+73 % OF OI-Commercial-Short (Other)
+
+74 % OF OI-Total Reportable-Long (Other)
+
+75 % OF OI-Total Reportable-Short (Other)
+
+76 % OF OI-Nonreportable-Long (Other)
+
+77 % OF OI-Nonreportable-Short (Other)
+
+78 Traders-Total (All)
+
+79 Traders-Noncommercial-Long (All)
+
+80 Traders-Noncommercial-Short (All)
+
+81 Traders-Noncommercial-Spreading (All)
+
+82 Traders-Commercial-Long (All)
+
+83 Traders-Commercial-Short (All)
+
+84 Traders-Total Reportable-Long (All)
+
+85 Traders-Total Reportable-Short (All)
+
+86 Traders-Total (Old)
+
+87 Traders-Noncommercial-Long (Old)
+
+88 Traders-Noncommercial-Short (Old)
+
+89 Traders-Noncommercial-Spreading (Old)
+
+90 Traders-Commercial-Long (Old)
+
+91 Traders-Commercial-Short (Old)
+
+92 Traders-Total Reportable-Long (Old)
+
+93 Traders-Total Reportable-Short (Old)
+
+94 Traders-Total (Other)
+
+95 Traders-Noncommercial-Long (Other)
+
+96 Traders-Noncommercial-Short (Other)
+
+97 Traders-Noncommercial-Spreading (Other)
+
+98 Traders-Commercial-Long (Other)
+
+99 Traders-Commercial-Short (Other)
+
+100 Traders-Total Reportable-Long (Other)
+
+101 Traders-Total Reportable-Short (Other)
+
+102 Concentration-Gross LT = 4 TDR-Long (All)
+
+103 Concentration-Gross LT ="4" TDR-Short (All)
+
+104 Concentration-Gross LT ="8" TDR-Long (All)
+
+105 Concentration-Gross LT ="8" TDR-Short (All)
+
+106 Concentration-Net LT ="4" TDR-Long (All)
+
+107 Concentration-Net LT ="4" TDR-Short (All)
+
+108 Concentration-Net LT ="8" TDR-Long (All)
+
+109 Concentration-Net LT ="8" TDR-Short (All)
+
+110 Concentration-Gross LT ="4" TDR-Long (Old)
+
+111 Concentration-Gross LT ="4" TDR-Short (Old)
+
+112 Concentration-Gross LT ="8" TDR-Long (Old)
+
+113 Concentration-Gross LT ="8" TDR-Short (Old)
+
+114 Concentration-Net LT ="4" TDR-Long (Old)
+
+115 Concentration-Net LT ="4" TDR-Short (Old)
+
+116 Concentration-Net LT ="8" TDR-Long (Old)
+
+117 Concentration-Net LT ="8" TDR-Short (Old)
+
+118 Concentration-Gross LT ="4" TDR-Long (Other)
+
+119 Concentration-Gross LT ="4" TDR-Short(Other)
+
+120 Concentration-Gross LT ="8" TDR-Long (Other)
+
+121 Concentration-Gross LT ="8" TDR-Short(Other)
+
+122 Concentration-Net LT ="4" TDR-Long (Other)
+
+123 Concentration-Net LT ="4" TDR-Short (Other)
+
+124 Concentration-Net LT ="8" TDR-Long (Other)
+
+125 Concentration-Net LT ="8" TDR-Short (Other)
+
+126 Contract Units
+
+127 CFTC Contract Market Code (Quotes)
+
+128 CFTC Market Code in Initials (Quotes)
+
+129 CFTC Commodity Code (Quotes)
