@@ -1,16 +1,18 @@
-# %%
+# %% - imports and other settings
 import pandas as pd
 import numpy as np
 import os
 import fnmatch
 from datetime import datetime
+import pprint
+
+import matplotlib.pyplot as plt
 
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all" #This is for multiple print statements per cell
 
 
 # %% function to retrieve dataframe and aggregate
-
 def data2Df(files):
     df_aggregated = pd.DataFrame()
     for file in files:
@@ -30,9 +32,7 @@ def data2Df(files):
             print(df_aggregated)
     return df_aggregated
 
-# %% function to get all txt files' names and append to list, then return list
-
-
+# %% function to get all txt files' names and append to list, then return list (current directory only, no subdirectories)
 def getDataFiles():
     files_list = [f for f in os.listdir() if os.path.isfile(
         f) and fnmatch.fnmatch(f, 'f_year*.txt')]
@@ -58,3 +58,11 @@ df_all.drop(['Report_Date_as_YYYY-MM-DD'], axis=1, inplace=True)
 df_all = df_all.sort_index()
 df_all.head()
 df_all.tail()
+# %% - visualize
+plt.rcParams['figure.figsize'] = (10, 8)   # Increases the Plot Size
+df_all['Tot_Rept_Positions_Short_All'].plot(grid = True,color='blue')
+df_all['Tot_Rept_Positions_Long_All'].plot(grid = True,color='orange')
+plt.legend()
+# %%
+list_of_columns = df_all.columns.tolist()
+pprint.pprint(list_of_columns)
