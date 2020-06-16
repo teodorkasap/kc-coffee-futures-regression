@@ -3,30 +3,13 @@ import pandas as pd
 import numpy as np
 import os
 import fnmatch
+from datetime import datetime
 
-# %%
-df = pd.read_csv("f_year2017.txt")
-# %%
-print(df.columns)
-# %%
-commodity_codes = df['CFTC_Commodity_Code'].unique()
-# %%
-markets = []
-for code in commodity_codes:
-    name = df[df['CFTC_Commodity_Code'] == code].iloc[0, 0]
-    markets.append(name)
-# %%
-coffee_markets = []
-for market in markets:
-    if "coffee" in market.lower():
-        coffee_markets.append(market)
-print(coffee_markets)
-# %%
-df = df[df['Market_and_Exchange_Names'] == 'COFFEE C - ICE FUTURES U.S.']
-df
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = "all" #This is for multiple print statements per cell
+
 
 # %% function to retrieve dataframe and aggregate
-
 
 def data2Df(files):
     df_aggregated = pd.DataFrame()
@@ -56,8 +39,22 @@ def getDataFiles():
     return files_list
 
 
-# %%
+# %% - get data from every file and append to a master dataframe
 files = getDataFiles()
 df_all = data2Df(files)
+# %% - check data frame
+df_all.shape
+# %% - check data types
+df_all.dtypes
+# %% - convert column to datetime from object
+df_all['Report_Date_as_YYYY-MM-DD'] = pd.to_datetime(df_all['Report_Date_as_YYYY-MM-DD'])
+# %% - check data types
+df_all.dtypes
 # %%
-df_all
+df_all['date'] = pd.to_datetime(df_all['Report_Date_as_YYYY-MM-DD'])
+df_all = df_all.set_index('date')
+df_all.drop(['Report_Date_as_YYYY-MM-DD'], axis=1, inplace=True)
+# %% - sort according to new index and check
+df_all = df_all.sort_index()
+df_all.head()
+df_all.tail()
