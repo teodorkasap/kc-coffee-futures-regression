@@ -57,12 +57,16 @@ df_all.drop(['Report_Date_as_YYYY-MM-DD'], axis=1, inplace=True)
 # %% - sort according to new index and check
 df_all = df_all.sort_index()
 df_all.head()
+# %% - add net position along with short / long
+df_all['Net_Position']=df_all['Prod_Merc_Positions_Short_All']-df_all['Prod_Merc_Positions_Long_All']
 df_all.tail()
 # %% - visualize
 plt.rcParams['figure.figsize'] = (10, 8)   # Increases the Plot Size
-df_all['Tot_Rept_Positions_Short_All'].plot(grid = True,color='blue')
-df_all['Tot_Rept_Positions_Long_All'].plot(grid = True,color='orange')
+df_all['Prod_Merc_Positions_Short_All'].plot(grid = True,color='blue')
+df_all['Prod_Merc_Positions_Long_All'].plot(grid = True,color='orange')
+df_all['Net_Position'].plot(grid = True,color='red')
 plt.legend()
 # %%
 list_of_columns = df_all.columns.tolist()
 pprint.pprint(list_of_columns)
+# %% - plot new column
