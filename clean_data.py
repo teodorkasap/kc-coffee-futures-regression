@@ -13,21 +13,21 @@ InteractiveShell.ast_node_interactivity = "all" #This is for multiple print stat
 
 
 # %% function to retrieve dataframe and aggregate
-def data2Df(files):
+def data2Df(files,commodity):
     df_aggregated = pd.DataFrame()
     for file in files:
-        df = pd.read_csv(file)
+        df = pd.read_excel(file)
         commodity_codes = df['CFTC_Commodity_Code'].unique()
         markets = []
         for code in commodity_codes:
             name = df[df['CFTC_Commodity_Code'] == code].iloc[0, 0]
             markets.append(name)
-        coffee_markets = []
+        commodity_markets = []
         for market in markets:
-            if "coffee" in market.lower():
-                coffee_markets.append(market)
-        for coffee_market in coffee_markets:
-            df = df[df['Market_and_Exchange_Names'] == coffee_market]
+            if commodity in market.lower():
+                commodity_markets.append(market)
+        for commodity_market in commodity_markets:
+            df = df[df['Market_and_Exchange_Names'] == commodity_market]
             df_aggregated = df_aggregated.append(df)
             print(df_aggregated)
     return df_aggregated
@@ -35,13 +35,14 @@ def data2Df(files):
 # %% function to get all txt files' names and append to list, then return list (current directory only, no subdirectories)
 def getDataFiles():
     files_list = [f for f in os.listdir() if os.path.isfile(
-        f) and fnmatch.fnmatch(f, 'f_year*.txt')]
+        f) and fnmatch.fnmatch(f, 'CIT*.xls')]
     return files_list
 
 
-# %% - get data from every file and append to a master dataframe
+# %% - get data from every file and append to a master dataframe by specifying the commodity
+commodity = "coffee"
 files = getDataFiles()
-df_all = data2Df(files)
+df_all = data2Df(files,commodity)
 # %% - check data frame
 df_all.shape
 # %% - check data types
