@@ -48,26 +48,28 @@ df_all.shape
 # %% - check data types
 df_all.dtypes
 # %% - convert column to datetime from object
-df_all['Report_Date_as_YYYY-MM-DD'] = pd.to_datetime(df_all['Report_Date_as_YYYY-MM-DD'])
+# df_all['Report_Date_as_YYYY-MM-DD'] = pd.to_datetime(df_all['Report_Date_as_YYYY-MM-DD'])
 # %% - check data types
-df_all.dtypes
+# df_all.dtypes
 # %%
-df_all['date'] = pd.to_datetime(df_all['Report_Date_as_YYYY-MM-DD'])
+df_all['date'] = pd.to_datetime(df_all['Report_Date_as_YYYY_MM_DD'])
 df_all = df_all.set_index('date')
-df_all.drop(['Report_Date_as_YYYY-MM-DD'], axis=1, inplace=True)
+df_all.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
+df_all.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
 # %% - sort according to new index and check
 df_all = df_all.sort_index()
 df_all.head()
 # %% - add net position along with short / long
-df_all['Net_Position']=df_all['Prod_Merc_Positions_Short_All']-df_all['Prod_Merc_Positions_Long_All']
+df_all['Net_Position']=df_all['NComm_Positions_Short_All_NoCIT']-df_all['NComm_Positions_Long_All_NoCIT']
 df_all.tail()
 # %% - visualize
 plt.rcParams['figure.figsize'] = (10, 8)   # Increases the Plot Size
-df_all['Prod_Merc_Positions_Short_All'].plot(grid = True,color='blue')
-df_all['Prod_Merc_Positions_Long_All'].plot(grid = True,color='orange')
+df_all['NComm_Positions_Short_All_NoCIT'].plot(grid = True,color='blue')
+df_all['NComm_Positions_Long_All_NoCIT'].plot(grid = True,color='orange')
 df_all['Net_Position'].plot(grid = True,color='red')
 plt.legend()
 # %%
 list_of_columns = df_all.columns.tolist()
 pprint.pprint(list_of_columns)
 # %% - plot new column
+# Todo: change name of df_all to suite future use
