@@ -80,6 +80,8 @@ pprint.pprint(list_of_columns)
 # Todo: change name of df_all to suite future use
 # %%
 df_all.head()
+df_all.tail()
+
 
 # %% - get coffee weekly price data
 df_coffee_price = pd.read_csv('coffee-futures-hist-data-weekly.csv')

@@ -7,6 +7,8 @@ from datetime import datetime
 import pprint
 import re
 
+from functools import partial, reduce
+
 import matplotlib.pyplot as plt
 
 from IPython.core.interactiveshell import InteractiveShell
@@ -53,6 +55,19 @@ def data2Df(files):
 
 # %% - get all data frames into a dictionary
 dataframes = data2Df(files)
-# %% - check start and finish dates of each dataframe
-for k,v in dataframes.items():
-    print(k,v)
+# %% - make start and end date of each dataframe equal
+for k, v in dataframes.items():
+    v['Date'] = pd.to_datetime(v['Date'], format='%b %d, %Y')
+    v = v[~(v['Date'] < '2007-09-02')]
+    v = v[~(v['Date'] > '2020-07-19')]
+    v = v.drop(['Open', 'High', 'Low'], axis=1)
+    if 'Vol.' in v.columns:
+        v.columns = ['Date', k+' Price', k+' Vol.' , k+' Change%']
+    else:
+        v.columns = ['Date', k+' Price', k+' Change%']
+    # v = v.set_index('Date')
+    dataframes.update({k: v})
+
+# %% - merge all dataframes to a new one
+my_reduce = partial(pd.merge, on='Date', how='outer')
+reduce(my_reduce, dataframes.values())  
