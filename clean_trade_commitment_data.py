@@ -86,12 +86,28 @@ df_all_commit['Prev Sunday'] = df_all_commit.index.shift(-2, freq='d')
 df_all_commit.head()
 df_all_commit.tail()
 
+
 def convert_to_float(value):
     text = str(value)
-    text = text.strip()
-    text = text.replace("%","")
-    number = float(text)
-    number = number/100
+    if "K" in text:
+        text = text.strip()
+        text = text.replace("K", "")
+        try:
+            number = float(text)
+            number = number*1000
+        except ValueError as e:
+            print("encountered an error, leaving cell empty")
+            number=0
+    else:
+        text = text.strip()
+        text = text.replace("%", "")
+        try:
+            number = float(text)
+            number = number/100
+        except ValueError as e:
+            print("encountered an error, leaving cell empty")
+            number=0
+
     return number
 
 
@@ -102,35 +118,47 @@ df_coffee_price = pd.read_csv('coffee-futures-hist-data-weekly.csv')
 df_coffee_price['Date'] = pd.to_datetime(
     df_coffee_price['Date'], format='%b %d, %Y')
 df_coffee_price = df_coffee_price.drop(
-    ['Price', 'Open', 'High', 'Low', 'Vol.'], axis=1)
-columns = ['Coffee Date','Coffee Price Change%']
+    ['Price', 'Open', 'High', 'Low'], axis=1)
+columns = ['Coffee Date', 'Coffee Vol.', 'Coffee Price Change%']
 df_coffee_price.columns = columns
 df_coffee_price
 
 # %% - merge coffee commitments and coffee price
-df_coffee = df_all_commit.merge(df_coffee_price, left_on='Prev Sunday', right_on='Coffee Date')
-df_coffee = df_coffee[['Coffee Date','Net_Position','Coffee Price Change%']]
+df_coffee = df_all_commit.merge(
+    df_coffee_price, left_on='Prev Sunday', right_on='Coffee Date')
+df_coffee = df_coffee[['Coffee Date', 'Net_Position',
+                       'Coffee Vol.', 'Coffee Price Change%']]
 # df_coffee['Coffee Price Change%'] = df_coffee['Coffee Price Change%'].astype(float)
-df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change%'].shift(periods=1,fill_value=0)
+df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change%'].shift(
+    periods=1)
+df_coffee['Coffee Vol. shifted'] = df_coffee['Coffee Vol.'].shift(
+    periods=1)
+df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change% shifted'].apply(
+    lambda x: convert_to_float(x))
+df_coffee['Coffee Vol. shifted'] = df_coffee['Coffee Vol. shifted'].apply(
+    lambda x: convert_to_float(x))
+
+df_coffee = df_coffee.dropna(axis=0)
+
 df_coffee.dtypes
-df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change% shifted'].apply(lambda x: convert_to_float(x))
-# df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change%'].astype('|S')
-# df_coffee['Coffee Price Change% shifted'] = pd.to_numeric(df_coffee['Coffee Price Change% shifted'],errors='coerce')
-# df_coffee['Coffee Price Change%'] = pd.to_numeric(df_coffee['Coffee Price Change%'],downcast="float")
-# df_coffee.dropna(axis=0)
-
-df_coffee
-
+df_coffee.describe()
 
 
 # Todo: fix exclusion of pre-ICE era data in the commitments data!!
 # Todo: reindex coffee price data using datetime column as index!
 
-
-# %% - scatter plot
-plt.scatter(df_coffee['Net_Position'],df_coffee['Coffee Price Change% shifted'])
+# %% - plot vol against price change
+plt.scatter(df_coffee['Coffee Vol. shifted'],
+            df_coffee['Coffee Price Change% shifted'])
 plt.axhline(0)
 plt.axvline(0)
 plt.show()
 
-# %%
+# %% - scatter plot
+plt.scatter(df_coffee['Net_Position'],
+            df_coffee['Coffee Price Change% shifted'])
+plt.axhline(0)
+plt.axvline(0)
+plt.show()
+
+# %% - Run LSTM Model
