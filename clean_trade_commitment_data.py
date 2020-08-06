@@ -86,6 +86,14 @@ df_all_commit['Prev Sunday'] = df_all_commit.index.shift(-2, freq='d')
 df_all_commit.head()
 df_all_commit.tail()
 
+def convert_to_float(value):
+    text = str(value)
+    text = text.strip()
+    text = text.replace("%","")
+    number = float(text)
+    number = number/100
+    return number
+
 
 # %% - get coffee weekly price data
 df_coffee_price = pd.read_csv('coffee-futures-hist-data-weekly.csv')
@@ -102,10 +110,17 @@ df_coffee_price
 # %% - merge coffee commitments and coffee price
 df_coffee = df_all_commit.merge(df_coffee_price, left_on='Prev Sunday', right_on='Coffee Date')
 df_coffee = df_coffee[['Coffee Date','Net_Position','Coffee Price Change%']]
+# df_coffee['Coffee Price Change%'] = df_coffee['Coffee Price Change%'].astype(float)
 df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change%'].shift(periods=1,fill_value=0)
+df_coffee.dtypes
+df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change% shifted'].apply(lambda x: convert_to_float(x))
+# df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change%'].astype('|S')
+# df_coffee['Coffee Price Change% shifted'] = pd.to_numeric(df_coffee['Coffee Price Change% shifted'],errors='coerce')
 # df_coffee['Coffee Price Change%'] = pd.to_numeric(df_coffee['Coffee Price Change%'],downcast="float")
 # df_coffee.dropna(axis=0)
+
 df_coffee
+
 
 
 # Todo: fix exclusion of pre-ICE era data in the commitments data!!
@@ -117,3 +132,5 @@ plt.scatter(df_coffee['Net_Position'],df_coffee['Coffee Price Change% shifted'])
 plt.axhline(0)
 plt.axvline(0)
 plt.show()
+
+# %%
