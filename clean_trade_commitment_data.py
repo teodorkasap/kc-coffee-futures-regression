@@ -45,49 +45,75 @@ def getDataFiles():
 # %% - get data from every file and append to a master dataframe by specifying the commodity
 commodity = "coffee"
 files = getDataFiles()
-df_all = data2Df(files, commodity)
+df_all_commit = data2Df(files, commodity)
 # %% - check data frame
-df_all.shape
+df_all_commit.shape
 # %% - check data types
-df_all.dtypes
+df_all_commit.dtypes
 # %% - convert column to datetime from object
-# df_all['Report_Date_as_YYYY-MM-DD'] = pd.to_datetime(df_all['Report_Date_as_YYYY-MM-DD'])
+# df_all_commit['Report_Date_as_YYYY-MM-DD'] = pd.to_datetime(df_all_commit['Report_Date_as_YYYY-MM-DD'])
 # %% - check data types
-# df_all.dtypes
+# df_all_commit.dtypes
 # %%
-df_all['date'] = pd.to_datetime(
-    df_all['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
-df_all = df_all.set_index('date')
-df_all.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
-df_all.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
+df_all_commit['date'] = pd.to_datetime(
+    df_all_commit['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
+df_all_commit = df_all_commit.set_index('date')
+df_all_commit.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
+df_all_commit.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
 # %% - sort according to new index and check
-df_all = df_all.sort_index()
-df_all.head()
+df_all_commit = df_all_commit.sort_index()
+df_all_commit.head()
 # %% - add net position along with short / long
-df_all['Net_Position'] = df_all['NComm_Positions_Short_All_NoCIT'] - \
-    df_all['NComm_Positions_Long_All_NoCIT']
-df_all.tail()
+df_all_commit['Net_Position'] = df_all_commit['NComm_Positions_Short_All_NoCIT'] - \
+    df_all_commit['NComm_Positions_Long_All_NoCIT']
+df_all_commit.tail()
 # %% - visualize
 plt.rcParams['figure.figsize'] = (10, 8)   # Increases the Plot Size
-df_all['NComm_Positions_Short_All_NoCIT'].plot(grid=True, color='blue')
-df_all['NComm_Positions_Long_All_NoCIT'].plot(grid=True, color='orange')
-df_all['Net_Position'].plot(grid=True, color='red')
+df_all_commit['NComm_Positions_Short_All_NoCIT'].plot(grid=True, color='blue')
+df_all_commit['NComm_Positions_Long_All_NoCIT'].plot(grid=True, color='orange')
+df_all_commit['Net_Position'].plot(grid=True, color='red')
 plt.legend()
 # %%
-list_of_columns = df_all.columns.tolist()
+list_of_columns = df_all_commit.columns.tolist()
 pprint.pprint(list_of_columns)
+
+# %% - shift dates back two days to get same date as other data
+df_all_commit['Prev Sunday'] = df_all_commit.index.shift(-2, freq='d')
+
 # %% - plot new column
-# Todo: change name of df_all to suite future use
+# Todo: change name of df_all_commit_commit to suite future use
 # %%
-df_all.head()
-df_all.tail()
+df_all_commit.head()
+df_all_commit.tail()
 
 
 # %% - get coffee weekly price data
 df_coffee_price = pd.read_csv('coffee-futures-hist-data-weekly.csv')
 
 # %% - change to datetime coffe price data frame
-df_coffee_price['Date'] = pd.to_datetime(df_coffee_price['Date'], format='%b %d, %Y')
+df_coffee_price['Date'] = pd.to_datetime(
+    df_coffee_price['Date'], format='%b %d, %Y')
+df_coffee_price = df_coffee_price.drop(
+    ['Price', 'Open', 'High', 'Low', 'Vol.'], axis=1)
+columns = ['Coffee Date','Coffee Price Change%']
+df_coffee_price.columns = columns
 df_coffee_price
+
+# %% - merge coffee commitments and coffee price
+df_coffee = df_all_commit.merge(df_coffee_price, left_on='Prev Sunday', right_on='Coffee Date')
+df_coffee = df_coffee[['Coffee Date','Net_Position','Coffee Price Change%']]
+df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change%'].shift(periods=1,fill_value=0)
+# df_coffee['Coffee Price Change%'] = pd.to_numeric(df_coffee['Coffee Price Change%'],downcast="float")
+# df_coffee.dropna(axis=0)
+df_coffee
+
+
 # Todo: fix exclusion of pre-ICE era data in the commitments data!!
 # Todo: reindex coffee price data using datetime column as index!
+
+
+# %% - scatter plot
+plt.scatter(df_coffee['Net_Position'],df_coffee['Coffee Price Change% shifted'])
+plt.axhline(0)
+plt.axvline(0)
+plt.show()

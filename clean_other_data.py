@@ -24,8 +24,7 @@ def getDataFiles():
     return files_list
 
 
-# %%
-files = getDataFiles()
+
 
 # %% - turn files into dataset
 
@@ -50,24 +49,28 @@ def data2Df(files):
         print("creating df: "+df_name)
         dataframes.update({df_name: pd.read_csv(dataset)})
 
+    for k, v in dataframes.items():
+        v['Date'] = pd.to_datetime(v['Date'], format='%b %d, %Y')
+        v = v[~(v['Date'] < '2007-09-02')]
+        v = v[~(v['Date'] > '2020-07-19')]
+        v = v.drop(['Open', 'High', 'Low'], axis=1)
+        if 'Vol.' in v.columns:
+            v.columns = ['Date', k+' Price', k+' Vol.' , k+' Change%']
+        else:
+            v.columns = ['Date', k+' Price', k+' Change%']
+        # v = v.set_index('Date')
+        dataframes.update({k: v})
+
+
     return dataframes
 
 
+# %% - get list of files to extract data from
+files = getDataFiles()
+
 # %% - get all data frames into a dictionary
 dataframes = data2Df(files)
-# %% - make start and end date of each dataframe equal
-for k, v in dataframes.items():
-    v['Date'] = pd.to_datetime(v['Date'], format='%b %d, %Y')
-    v = v[~(v['Date'] < '2007-09-02')]
-    v = v[~(v['Date'] > '2020-07-19')]
-    v = v.drop(['Open', 'High', 'Low'], axis=1)
-    if 'Vol.' in v.columns:
-        v.columns = ['Date', k+' Price', k+' Vol.' , k+' Change%']
-    else:
-        v.columns = ['Date', k+' Price', k+' Change%']
-    # v = v.set_index('Date')
-    dataframes.update({k: v})
 
-# %% - merge all dataframes to a new one
+# %% - merge all dataframes in the dictionary to a new one
 my_reduce = partial(pd.merge, on='Date', how='outer')
 reduce(my_reduce, dataframes.values())  
