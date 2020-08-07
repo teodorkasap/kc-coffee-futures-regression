@@ -49,16 +49,18 @@ df_all_commit = data2Df(files, commodity)
 
 # %% - make a function to process dataframe for traders commitments
 
-
-def process_commitment_data(df):
+# Todo: method below to be tested
+def process_commitment_data(df,commodity):
     df['date'] = pd.to_datetime(
         df['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
     df = df.set_index('date')
     df.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
     df.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
     df = df.sort_index()
-    df['Net_Position'] = df['NComm_Positions_Short_All_NoCIT'] - \
+    df['{} Net_Position'.format(commodity)] = df['NComm_Positions_Short_All_NoCIT'] - \
         df['NComm_Positions_Long_All_NoCIT']
+    df = df['date','{} Net_Position'.format(commodity)]
+    df['Prev Sunday'] = df.index.shift(-2, freq='d')
     return df
 
 
