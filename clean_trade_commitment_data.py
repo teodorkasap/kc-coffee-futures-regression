@@ -46,14 +46,22 @@ def getDataFiles():
 commodity = "coffee"
 files = getDataFiles()
 df_all_commit = data2Df(files, commodity)
-# %% - check data frame
-df_all_commit.shape
-# %% - check data types
-df_all_commit.dtypes
-# %% - convert column to datetime from object
-# df_all_commit['Report_Date_as_YYYY-MM-DD'] = pd.to_datetime(df_all_commit['Report_Date_as_YYYY-MM-DD'])
-# %% - check data types
-# df_all_commit.dtypes
+
+# %% - make a function to process dataframe for traders commitments
+
+
+def process_commitment_data(df):
+    df['date'] = pd.to_datetime(
+        df['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
+    df = df.set_index('date')
+    df.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
+    df.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
+    df = df.sort_index()
+    df['Net_Position'] = df['NComm_Positions_Short_All_NoCIT'] - \
+        df['NComm_Positions_Long_All_NoCIT']
+    return df
+
+
 # %%
 df_all_commit['date'] = pd.to_datetime(
     df_all_commit['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
@@ -97,7 +105,7 @@ def convert_to_float(value):
             number = number*1000
         except ValueError as e:
             print("encountered an error, leaving cell empty")
-            number=0
+            number = 0
     else:
         text = text.strip()
         text = text.replace("%", "")
@@ -106,7 +114,7 @@ def convert_to_float(value):
             number = number/100
         except ValueError as e:
             print("encountered an error, leaving cell empty")
-            number=0
+            number = 0
 
     return number
 
