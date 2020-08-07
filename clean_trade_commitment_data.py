@@ -7,6 +7,7 @@ from datetime import datetime
 import pprint
 
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 from IPython.core.interactiveshell import InteractiveShell
 # This is for multiple print statements per cell
@@ -43,58 +44,76 @@ def getDataFiles():
 
 
 # %% - get data from every file and append to a master dataframe by specifying the commodity
-commodity = "coffee"
-files = getDataFiles()
-df_all_commit = data2Df(files, commodity)
+
 
 # %% - make a function to process dataframe for traders commitments
 
-# Todo: method below to be tested
-def process_commitment_data(df,commodity):
+def process_commitment_data(df, commodity):
     df['date'] = pd.to_datetime(
         df['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
-    df = df.set_index('date')
     df.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
     df.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
-    df = df.sort_index()
-    df['{} Net_Position'.format(commodity)] = df['NComm_Positions_Short_All_NoCIT'] - \
+    df['{} comm. Net_Position'.format(commodity)] = df['NComm_Positions_Short_All_NoCIT'] - \
         df['NComm_Positions_Long_All_NoCIT']
-    df = df['date','{} Net_Position'.format(commodity)]
+    print(df)
+    df = df[['date', '{} comm. Net_Position'.format(commodity)]]
+    print(df)
+    df = df.set_index('date')
     df['Prev Sunday'] = df.index.shift(-2, freq='d')
+    df = df.sort_index()
     return df
 
 
 # %%
-df_all_commit['date'] = pd.to_datetime(
-    df_all_commit['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
-df_all_commit = df_all_commit.set_index('date')
-df_all_commit.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
-df_all_commit.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
-# %% - sort according to new index and check
-df_all_commit = df_all_commit.sort_index()
-df_all_commit.head()
-# %% - add net position along with short / long
-df_all_commit['Net_Position'] = df_all_commit['NComm_Positions_Short_All_NoCIT'] - \
-    df_all_commit['NComm_Positions_Long_All_NoCIT']
-df_all_commit.tail()
+# df_all_commit['date'] = pd.to_datetime(
+#     df_all_commit['As_of_Date_In_Form_YYMMDD'], format='%y%m%d', errors='coerce')
+# df_all_commit = df_all_commit.set_index('date')
+# df_all_commit.drop(['Report_Date_as_YYYY_MM_DD'], axis=1, inplace=True)
+# df_all_commit.drop(['Report_Date_as_MM_DD_YYYY'], axis=1, inplace=True)
+# # %% - sort according to new index and check
+# df_all_commit = df_all_commit.sort_index()
+# df_all_commit.head()
+# # %% - add net position along with short / long
+# df_all_commit['Net_Position'] = df_all_commit['NComm_Positions_Short_All_NoCIT'] - \
+#     df_all_commit['NComm_Positions_Long_All_NoCIT']
+# df_all_commit.tail()
+
+# %% - get commitment data
+
+commodity1 = "coffee"
+commodity2 = "sugar"
+commodity3 = "cocoa"
+files = getDataFiles()
+df_coffee_comm = data2Df(files, commodity1)
+df_coffee_comm = process_commitment_data(df_coffee_comm, commodity1)
+df_sugar_comm = data2Df(files, commodity2)
+df_sugar_comm = process_commitment_data(df_sugar_comm, commodity2)
+df_cocoa_comm = data2Df(files, commodity3)
+df_cocoa_comm = process_commitment_data(df_cocoa_comm, commodity3)
+
+df_coffee_comm
+df_cocoa_comm
+df_sugar_comm
+
+# %% - merge dataframes
+merged_inner = pd.merge(left=df_coffee_comm, right=df_cocoa_comm,
+                        left_on='Prev Sunday', right_on='Prev Sunday')
+merged_inner = pd.merge(left=merged_inner, right=df_sugar_comm,
+                        left_on='Prev Sunday', right_on='Prev Sunday')
+
+
 # %% - visualize
 plt.rcParams['figure.figsize'] = (10, 8)   # Increases the Plot Size
-df_all_commit['NComm_Positions_Short_All_NoCIT'].plot(grid=True, color='blue')
-df_all_commit['NComm_Positions_Long_All_NoCIT'].plot(grid=True, color='orange')
-df_all_commit['Net_Position'].plot(grid=True, color='red')
+df_cocoa_comm['cocoa comm. Net_Position'].plot(grid=True, color='blue')
+df_coffee_comm['coffee comm. Net_Position'].plot(grid=True, color='orange')
+df_sugar_comm['sugar comm. Net_Position'].plot(grid=True, color='red')
 plt.legend()
-# %%
-list_of_columns = df_all_commit.columns.tolist()
-pprint.pprint(list_of_columns)
 
 # %% - shift dates back two days to get same date as other data
-df_all_commit['Prev Sunday'] = df_all_commit.index.shift(-2, freq='d')
+# df_all_commit['Prev Sunday'] = df_all_commit.index.shift(-2, freq='d')
 
 # %% - plot new column
 # Todo: change name of df_all_commit_commit to suite future use
-# %%
-df_all_commit.head()
-df_all_commit.tail()
 
 
 def convert_to_float(value):
@@ -134,41 +153,84 @@ df_coffee_price.columns = columns
 df_coffee_price
 
 # %% - merge coffee commitments and coffee price
-df_coffee = df_all_commit.merge(
-    df_coffee_price, left_on='Prev Sunday', right_on='Coffee Date')
-df_coffee = df_coffee[['Coffee Date', 'Net_Position',
+df_master = pd.merge(left=merged_inner, right=df_coffee_price,
+                     left_on='Prev Sunday', right_on='Coffee Date')
+df_master = df_master[['Coffee Date', 'coffee comm. Net_Position', 'cocoa comm. Net_Position', 'sugar comm. Net_Position',
                        'Coffee Vol.', 'Coffee Price Change%']]
+
+
+# %%
+df_master = df_master.set_index('Coffee Date')
+# %% - make new columns with shifted coffee price
 # df_coffee['Coffee Price Change%'] = df_coffee['Coffee Price Change%'].astype(float)
-df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change%'].shift(
+df_master['Coffee Price Change% shifted'] = df_master['Coffee Price Change%'].shift(
     periods=1)
-df_coffee['Coffee Vol. shifted'] = df_coffee['Coffee Vol.'].shift(
-    periods=1)
-df_coffee['Coffee Price Change% shifted'] = df_coffee['Coffee Price Change% shifted'].apply(
-    lambda x: convert_to_float(x))
-df_coffee['Coffee Vol. shifted'] = df_coffee['Coffee Vol. shifted'].apply(
-    lambda x: convert_to_float(x))
+# df_master['Coffee Vol. shifted'] = df_master['Coffee Vol.'].shift(
+#     periods=1)
 
-df_coffee = df_coffee.dropna(axis=0)
+# %% - change type to float
+df_master['Coffee Price Change% shifted'] = df_master['Coffee Price Change% shifted'].apply(
+    lambda x: convert_to_float(x))
+# df_master['Coffee Vol. shifted'] = df_master['Coffee Vol. shifted'].apply(
+#     lambda x: convert_to_float(x))
 
-df_coffee.dtypes
-df_coffee.describe()
+df_master = df_master.dropna(axis=0)
+
+df_master.dtypes
+df_master.describe()
+df_master
+
+# %% - drop unused columns
+df_master = df_master.drop(['Coffee Vol.', 'Coffee Price Change%'], axis=1)
+df_master
+
+# %% - train normalizer
+values = df_master.values
+scaler = MinMaxScaler()
+x_scaled = scaler.fit_transform(values)
+# %% - normalize
+df_scaled = pd.DataFrame(x_scaled)
+
+# %% inverse transform and print the first 5 rows
+# inversed = scaler.inverse_transform(normalized)
+
+# %% - standardized data frame
+# df_standard = pd.DataFrame(inversed,index=df_master.index, columns=['coffee comm. Net_Position','cocoa comm. Net_Position','sugar comm. Net_Position','Coffee Price Change% shifted'])
+# df_standard
+df_scaled.columns = ['coffee comm. Net_Position', 'cocoa comm. Net_Position',
+    'sugar comm. Net_Position', 'Coffee Price Change% shifted']
+# %% - 
+# Todo: get index of df_master to index df scaled
+df_scaled.index = df_master.index
+
+# %%
+df_scaled
+
+# %%
+plt.rcParams['figure.figsize']=(10, 8)   # Increases the Plot Size
+df_scaled['cocoa comm. Net_Position'].plot(grid = True, color = 'blue')
+df_scaled['coffee comm. Net_Position'].plot(grid = True, color = 'orange')
+df_scaled['sugar comm. Net_Position'].plot(grid = True, color = 'red')
+df_scaled['Coffee Price Change% shifted'].plot(grid = True, color = 'pink')
+plt.legend()
+
 
 
 # Todo: fix exclusion of pre-ICE era data in the commitments data!!
 # Todo: reindex coffee price data using datetime column as index!
 
 # %% - plot vol against price change
-plt.scatter(df_coffee['Coffee Vol. shifted'],
-            df_coffee['Coffee Price Change% shifted'])
-plt.axhline(0)
-plt.axvline(0)
-plt.show()
+# plt.scatter(df_coffee['Coffee Vol. shifted'],
+#             df_coffee['Coffee Price Change% shifted'])
+# plt.axhline(0)
+# plt.axvline(0)
+# plt.show()
 
-# %% - scatter plot
-plt.scatter(df_coffee['Net_Position'],
-            df_coffee['Coffee Price Change% shifted'])
-plt.axhline(0)
-plt.axvline(0)
-plt.show()
+# # %% - scatter plot
+# plt.scatter(df_coffee['Net_Position'],
+#             df_coffee['Coffee Price Change% shifted'])
+# plt.axhline(0)
+# plt.axvline(0)
+# plt.show()
 
 # %% - Run LSTM Model
