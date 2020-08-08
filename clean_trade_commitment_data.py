@@ -243,3 +243,7 @@ df_subset1['coffee comm. Net_Position'].plot(grid = True, color = 'orange')
 df_subset1['sugar comm. Net_Position'].plot(grid = True, color = 'red')
 df_subset1['Coffee Price Change% shifted'].plot(grid = True, color = 'pink')
 plt.legend()
+
+# %% - save df to 
+df_scaled.to_csv(r'scaled-coffee-cocoa-sugar-commitment-coffee-price-data.csv')
+df_master.to_csv(r'coffee-cocoa-sugar-commitment-coffee-price-data.csv')
