@@ -233,4 +233,13 @@ plt.legend()
 # plt.axvline(0)
 # plt.show()
 
-# %% - Run LSTM Model
+# %% - 
+df_scaled.describe()
+# %%
+df_subset1 = df_scaled.iloc[100:150]
+plt.rcParams['figure.figsize']=(10, 8)   # Increases the Plot Size
+df_subset1['cocoa comm. Net_Position'].plot(grid = True, color = 'blue')
+df_subset1['coffee comm. Net_Position'].plot(grid = True, color = 'orange')
+df_subset1['sugar comm. Net_Position'].plot(grid = True, color = 'red')
+df_subset1['Coffee Price Change% shifted'].plot(grid = True, color = 'pink')
+plt.legend()
