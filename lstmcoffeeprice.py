@@ -78,7 +78,7 @@ scaled_train = scaler.transform(train_data)
 scaled_test = scaler.transform(test_data)
 
 # %% - generate time series
-length = 4
+length = 1
 generator = TimeseriesGenerator(
     scaled_train, scaled_train, length=length, batch_size=1)
 
@@ -94,7 +94,7 @@ scaled_train
 # %% - create model
 n_features = 1
 model = Sequential()
-model.add(LSTM(100, activation='relu', input_shape=(length, n_features)))
+model.add(LSTM(60, activation='relu', input_shape=(length, n_features)))
 model.add(Dense(1))
 model.compile(optimizer='adam', loss='mse')
 
@@ -109,7 +109,7 @@ validation_generator = TimeseriesGenerator(
 # %% - train model
 # model.fit_generator(generator, epochs=20,
 #                     validation_data=validation_generator, callbacks=[early_stop])
-model.fit_generator(generator, epochs=10,
+model.fit_generator(generator, epochs=4,
                     validation_data=validation_generator)
 
 # %% - check out losses
@@ -139,4 +139,4 @@ test_data['Predictions'] = true_predictions
 
 test_data
 test_data.plot(figsize =(12,8))
-# %%
+# %% - check out this tutorial: https://www.youtube.com/watch?v=6f67zrH-_IE
