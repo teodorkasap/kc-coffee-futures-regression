@@ -147,15 +147,17 @@ df_coffee_price = pd.read_csv('coffee-futures-hist-data-weekly.csv')
 df_coffee_price['Date'] = pd.to_datetime(
     df_coffee_price['Date'], format='%b %d, %Y')
 df_coffee_price = df_coffee_price.drop(
-    ['Price', 'Open', 'High', 'Low'], axis=1)
-columns = ['Coffee Date', 'Coffee Vol.', 'Coffee Price Change%']
+    ['Open', 'High', 'Low'], axis=1)
+df_coffee_price
+# %%
+columns = ['Coffee Date','Coffee Price', 'Coffee Vol.', 'Coffee Price Change%']
 df_coffee_price.columns = columns
 df_coffee_price
 
 # %% - merge coffee commitments and coffee price
 df_master = pd.merge(left=merged_inner, right=df_coffee_price,
                      left_on='Prev Sunday', right_on='Coffee Date')
-df_master = df_master[['Coffee Date', 'coffee comm. Net_Position', 'cocoa comm. Net_Position', 'sugar comm. Net_Position',
+df_master = df_master[['Coffee Date', 'Coffee Price', 'coffee comm. Net_Position', 'cocoa comm. Net_Position', 'sugar comm. Net_Position',
                        'Coffee Vol.', 'Coffee Price Change%']]
 
 
@@ -165,12 +167,24 @@ df_master = df_master.set_index('Coffee Date')
 # df_coffee['Coffee Price Change%'] = df_coffee['Coffee Price Change%'].astype(float)
 df_master['Coffee Price Change% shifted'] = df_master['Coffee Price Change%'].shift(
     periods=1)
+df_master['Coffee Price shifted'] = df_master['Coffee Price'].shift(
+    periods=1)
 # df_master['Coffee Vol. shifted'] = df_master['Coffee Vol.'].shift(
 #     periods=1)
+
+# %%
+df_master
 
 # %% - change type to float
 df_master['Coffee Price Change% shifted'] = df_master['Coffee Price Change% shifted'].apply(
     lambda x: convert_to_float(x))
+
+df_master['Coffee Price shifted'] = df_master['Coffee Price shifted'].apply(
+    lambda x: convert_to_float(x)*100)
+
+df_master['Coffee Price'] = df_master['Coffee Price'].apply(
+    lambda x: convert_to_float(x)*100)
+
 # df_master['Coffee Vol. shifted'] = df_master['Coffee Vol. shifted'].apply(
 #     lambda x: convert_to_float(x))
 
@@ -179,6 +193,11 @@ df_master = df_master.dropna(axis=0)
 df_master.dtypes
 df_master.describe()
 df_master
+
+# %%
+
+df_master.to_csv(r'coffee-cocoa-sugar-commitment-coffee-price-data-saved03082020.csv')
+
 
 # %% - drop unused columns
 df_master = df_master.drop(['Coffee Vol.', 'Coffee Price Change%'], axis=1)
