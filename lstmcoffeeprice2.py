@@ -26,8 +26,9 @@ df.describe()
 df
 # %% - training set
 dataset = df.iloc[:, 1:2].values
-training_set = dataset[:528]
+training_set = dataset[:422]
 test_set = dataset[528:]
+val_set = dataset[422:528]
 
 training_set
 test_set
@@ -35,18 +36,35 @@ test_set
 # %% - scale
 sc = MinMaxScaler(feature_range=(0, 1))
 training_set_scaled = sc.fit_transform(training_set)
+val_set_scaled = sc.transform(val_set)
 
 
 # %% data with timesteps
-timestep = 12
-X_train = []
-y_train = []
-for i in range(timestep, len(training_set_scaled)):
-    X_train.append(training_set_scaled[i-timestep:i, 0])
-    y_train.append(training_set_scaled[i, 0])
-X_train, y_train = np.array(X_train), np.array(y_train)
+timestep = 20
 
-X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
+def to_sequences(seq_size, obs):
+    x = []
+    y = []
+
+    for i in range (len(obs)-seq_size):
+        past_interval = obs[i:(i+seq_size)]
+        fut_value = obs[i+seq_size]
+        # fut_value = obs.shift(-seq_size)
+        print(past_interval)
+        # past_interval = [[x] for x in past_interval]
+        x.append(past_interval)
+        y.append(fut_value)
+
+    x = np.array(x)
+    y = np.array(y)
+    x = np.reshape(x, (x.shape[0], x.shape[1], 1))
+    return x,y
+
+
+X_train, y_train = to_sequences(timestep,training_set_scaled)
+x_val, y_val = to_sequences(timestep,val_set_scaled)
+
+
 
 
 # %%  - create model
@@ -77,17 +95,12 @@ early_stop = EarlyStopping(monitor='val_loss', patience=2)
 test_set_scaled = sc.fit_transform(test_set)
 
 # %% - make X_test and y_test
-X_test = []
-y_test = []
-for i in range(timestep, len(test_set_scaled)):
-    X_test.append(test_set_scaled[i-timestep:i, 0])
-    y_test.append(test_set_scaled[i, 0])
-X_test, y_test = np.array(X_test), np.array(y_test)
 
-X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+x_test, y_test = to_sequences(timestep,test_set_scaled)
+
 
 # %% - train model
-model.fit(X_train, y_train, validation_data=(X_test, y_test),
+model.fit(X_train, y_train, validation_data=(x_val, y_val),
           epochs=100, batch_size=1, callbacks=[early_stop])
 
 # %% - training predicion
@@ -106,7 +119,7 @@ plt.show()
 
 
 # %% - test data prediction
-predicted_test_data = model.predict(X_test)
+predicted_test_data = model.predict(x_test)
 predicted_test_data = sc.inverse_transform(predicted_test_data)
 
 
