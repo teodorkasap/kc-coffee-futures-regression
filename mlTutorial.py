@@ -19,7 +19,8 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Gradien
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score,confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report,roc_curve,auc
+from sklearn.feature_selection import SelectFromModel
 
 
 # This is for multiple print statements per cell
@@ -136,7 +137,6 @@ X_train_scaled = scaler.fit_transform(df_train_X)
 X_test_scaled = scaler.transform(df_test_x)
 
 
-
 # %% - Classification models
 
 classification_models = {
@@ -153,6 +153,7 @@ classification_models = {
 no_classifiers = len(classification_models.keys())
 
 # %% - batch training and results
+
 
 def batch_classify(df_train_scaled, df_test, verbose=True):
     df_results = pd.DataFrame(data=np.zeros(shape=(no_classifiers, 3)),
@@ -175,7 +176,7 @@ def batch_classify(df_train_scaled, df_test, verbose=True):
 
 # %% - train models
 
-df_results = batch_classify(X_train_scaled,df_train_y)
+df_results = batch_classify(X_train_scaled, df_train_y)
 print(df_results.sort_values(by='train_score', ascending=True))
 
 
@@ -194,14 +195,29 @@ print(df_results.sort_values(by='train_score', ascending=True))
 
 # %% - random forest
 
-model = RandomForestClassifier(n_estimators=1000,min_samples_leaf=1)
-model.fit(X_train_scaled,df_train_y)
+model = RandomForestClassifier(n_estimators=1000, min_samples_leaf=1)
+model.fit(X_train_scaled, df_train_y)
 
 predictions = model.predict(X_test_scaled)
 print("accuracy score: ")
-print(accuracy_score(df_test_y,predictions))
+print(accuracy_score(df_test_y, predictions))
 print("confusion matrix: ")
-print(confusion_matrix(df_test_y,predictions))
+print(confusion_matrix(df_test_y, predictions))
+print("classification report")
+print(classification_report(df_test_y, predictions))
+
+# %% - ROC curve
+pred_prob = model.predict_proba(X_test_scaled)[:,1]
+fpr, tpr, thresholds =roc_curve(df_test_y,pred_prob)
+roc_auc = auc(fpr,tpr)
+
+print("roc auc is:" + str(roc_auc))
+plt.plot([0,1],[0,1],"k--")
+plt.plot(fpr,tpr)
+plt.xlabel('False pos. rate')
+plt.ylabel('True pos. rate')
+plt.show()
+
 
 
 # %% - gradient boosting
@@ -229,13 +245,6 @@ print(confusion_matrix(df_test_y,predictions))
 # print(confusion_matrix(df_test_y,predictions))
 
 
-
-
-
-
-
-
-
 # =======================================================
 # %% - pick the most accurate and test
 # knn_model = KNeighborsClassifier()
@@ -247,6 +256,3 @@ print(confusion_matrix(df_test_y,predictions))
 # print(accuracy_score(df_test_y,predictions))
 # print("confusion matrix: ")
 # print(confusion_matrix(df_test_y,predictions))
-
-
-
