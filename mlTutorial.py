@@ -1,3 +1,6 @@
+# %% - source
+# https://medium.com/analytics-vidhya/stock-trend-prediction-with-technical-indicators-feature-engineering-and-python-code-1fa54d5806ba
+
 # %% - imports
 import time
 import matplotlib.pyplot as plt
@@ -16,7 +19,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Gradien
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score,confusion_matrix
 
 
 # This is for multiple print statements per cell
@@ -153,7 +156,7 @@ no_classifiers = len(classification_models.keys())
 
 def batch_classify(df_train_scaled, df_test, verbose=True):
     df_results = pd.DataFrame(data=np.zeros(shape=(no_classifiers, 3)),
-                              columns=['Classifier', 'Train_score', 'Training_time'])
+                              columns=['classfier', 'train_score', 'training_time'])
     count = 0
     for key, classifier in classification_models.items():
         t_start = time.process_time()
@@ -175,9 +178,55 @@ def batch_classify(df_train_scaled, df_test, verbose=True):
 df_results = batch_classify(X_train_scaled,df_train_y)
 print(df_results.sort_values(by='train_score', ascending=True))
 
+
+# %% - Logistic Reg.
+
+# model = LogisticRegression(solver='liblinear', max_iter=5000)
+# model.fit(X_train_scaled,df_train_y)
+# model
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y,predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y,predictions))
+
+
+# %% - random forest
+
+model = RandomForestClassifier(n_estimators=1000,min_samples_leaf=1)
+model.fit(X_train_scaled,df_train_y)
+
+predictions = model.predict(X_test_scaled)
+print("accuracy score: ")
+print(accuracy_score(df_test_y,predictions))
+print("confusion matrix: ")
+print(confusion_matrix(df_test_y,predictions))
+
+
+# %% - gradient boosting
+
+# model = GradientBoostingClassifier()
+# model.fit(X_train_scaled,df_train_y)
+# model
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y,predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y,predictions))
+
 # %% - naive bayes
 
+# model = GaussianNB()
+# model.fit(X_train_scaled,df_train_y)
+# model
 
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y,predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y,predictions))
 
 
 
@@ -188,7 +237,7 @@ print(df_results.sort_values(by='train_score', ascending=True))
 
 
 # =======================================================
-# # %% - pick the most accurate and test
+# %% - pick the most accurate and test
 # knn_model = KNeighborsClassifier()
 # knn_model.fit(X_train_scaled,df_train_y)
 
@@ -196,5 +245,8 @@ print(df_results.sort_values(by='train_score', ascending=True))
 # predictions = knn_model.predict(X_test_scaled)
 # print("accuracy score: ")
 # print(accuracy_score(df_test_y,predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y,predictions))
+
 
 
