@@ -2,6 +2,7 @@
 # https://medium.com/analytics-vidhya/stock-trend-prediction-with-technical-indicators-feature-engineering-and-python-code-1fa54d5806ba
 
 # %% - imports
+from prepUsdBrlData import getUsdBrlData
 import time
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -19,7 +20,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Gradien
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report,roc_curve,auc
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_curve, auc
 from sklearn.feature_selection import SelectFromModel
 
 
@@ -27,12 +28,20 @@ from sklearn.feature_selection import SelectFromModel
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 
-# %% - get data
+# own modules
+from prepUsdBrlData import getUsdBrlData
+
+# %% - get usd / brl data
+df_exch = getUsdBrlData()
+
+# %% - get KC data
 df = pd.read_csv(
     'KCK21.NYB.csv')
 
 # %% - drop nan
 df = df.dropna()
+
+
 
 # %% - get rid of rows with vol "0"
 # df = df[df['Volume']!=0]
@@ -41,6 +50,10 @@ df = df.dropna()
 
 df['Date'] = pd.to_datetime(
     df['Date'], format='%Y-%m-%d', errors='coerce')
+
+# %% - merge two dataframes on KC data dates
+df = pd.merge(left=df, right=df_exch, left_on='Date', right_on='Date')
+df
 
 # %% - set data column as index
 
@@ -207,17 +220,16 @@ print("classification report")
 print(classification_report(df_test_y, predictions))
 
 # %% - ROC curve
-pred_prob = model.predict_proba(X_test_scaled)[:,1]
-fpr, tpr, thresholds =roc_curve(df_test_y,pred_prob)
-roc_auc = auc(fpr,tpr)
+pred_prob = model.predict_proba(X_test_scaled)[:, 1]
+fpr, tpr, thresholds = roc_curve(df_test_y, pred_prob)
+roc_auc = auc(fpr, tpr)
 
 print("roc auc is:" + str(roc_auc))
-plt.plot([0,1],[0,1],"k--")
-plt.plot(fpr,tpr)
+plt.plot([0, 1], [0, 1], "k--")
+plt.plot(fpr, tpr)
 plt.xlabel('False pos. rate')
 plt.ylabel('True pos. rate')
 plt.show()
-
 
 
 # %% - gradient boosting
