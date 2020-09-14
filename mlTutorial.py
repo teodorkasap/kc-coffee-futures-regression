@@ -75,10 +75,6 @@ plt.ylabel('BRL')
 plt.show()
 
 
-df['USD_advance'] = np.where(df['USD_Close'].shift(-1) > df['USD_Close'], 1, 0)
-df['USD_advance']
-
-
 # %% - calculate Simple Moving Averages
 def add_SMA(dataframe, colum_name,  period, commodity):
     dataframe['{}_SMA_{}'.format(commodity, period)] = dataframe[colum_name].rolling(
@@ -109,8 +105,8 @@ add_EMA(df, 'KC_Close', 200, "KC")
 
 # %% - calculate Average True Range
 
-df['KC_ATR_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
-                            df['KC_Close'].values, timeperiod=14)
+# df['KC_ATR_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
+#                             df['KC_Close'].values, timeperiod=14)
 
 df['KC_ADX_14'] = talib.ADX(df['KC_High'].values, df['KC_Low'].values,
                             df['KC_Close'].values, timeperiod=14)
@@ -118,22 +114,71 @@ df['KC_ADX_14'] = talib.ADX(df['KC_High'].values, df['KC_Low'].values,
 df['KC_CCI_14'] = talib.CCI(df['KC_High'].values, df['KC_Low'].values,
                             df['KC_Close'].values, timeperiod=14)
 
-df['KC_ROC_10'] = talib.ROC(df['KC_Close'], timeperiod=10)
+# df['KC_ROC_10'] = talib.ROC(df['KC_Close'], timeperiod=10)
 
-df['KC_RSI_14'] = talib.RSI(df['KC_Close'], timeperiod=14)
+# df['KC_RSI_14'] = talib.RSI(df['KC_Close'], timeperiod=14)
 
-df['KC_Williams_%R_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
-                                    df['KC_Close'].values, timeperiod=14)
+# df['KC_Williams_%R_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
+#                                     df['KC_Close'].values, timeperiod=14)
 
 df['KC_Slowd'] = talib.STOCH(df['KC_High'].values,
-                                             df['KC_Low'].values,
-                                             df['KC_Close'].values,
-                                             fastk_period=5,
-                                             slowk_period=3,
-                                             slowk_matype=0,
-                                             slowd_period=3,
-                                             slowd_matype=0)[1]
+                             df['KC_Low'].values,
+                             df['KC_Close'].values,
+                             fastk_period=5,
+                             slowk_period=3,
+                             slowk_matype=0,
+                             slowd_period=3,
+                             slowd_matype=0)[1]
 
+df['USD_ATR_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
+                             df['USD_Close'].values, timeperiod=14)
+
+df['USD_ATR_10'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
+                             df['USD_Close'].values, timeperiod=10)
+
+df['USD_ADX_14'] = talib.ADX(df['USD_High'].values, df['USD_Low'].values,
+                             df['USD_Close'].values, timeperiod=14)
+
+df['USD_ADX_10'] = talib.ADX(df['USD_High'].values, df['USD_Low'].values,
+                             df['USD_Close'].values, timeperiod=10)
+
+df['USD_CCI_14'] = talib.CCI(df['USD_High'].values, df['USD_Low'].values,
+                             df['USD_Close'].values, timeperiod=14)
+
+df['USD_CCI_10'] = talib.CCI(df['USD_High'].values, df['USD_Low'].values,
+                             df['USD_Close'].values, timeperiod=10)
+
+df['USD_ROC_10'] = talib.ROC(df['USD_Close'], timeperiod=10)
+df['USD_ROC_5'] = talib.ROC(df['USD_Close'], timeperiod=5)
+
+df['USD_RSI_14'] = talib.RSI(df['USD_Close'], timeperiod=14)
+df['USD_RSI_7'] = talib.RSI(df['USD_Close'], timeperiod=7)
+
+df['USD_Williams_%R_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
+                                     df['USD_Close'].values, timeperiod=14)
+df['USD_Williams_%R_7'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
+                                    df['USD_Close'].values, timeperiod=7)
+
+df['USD_Slowk'], df['USD_Slowd'] = talib.STOCH(df['USD_High'].values,
+                                               df['USD_Low'].values,
+                                               df['USD_Close'].values,
+                                               fastk_period=5,
+                                               slowk_period=3,
+                                               slowk_matype=0,
+                                               slowd_period=3,
+                                               slowd_matype=0)
+
+add_SMA(df, 'USD_Close', 5, "USD")
+add_SMA(df, 'USD_Close', 10, "USD")
+add_SMA(df, 'USD_Close', 25, "USD")
+add_SMA(df, 'USD_Close', 50, "USD")
+add_SMA(df, 'USD_Close', 100, "USD")
+
+add_EMA(df, 'USD_Close', 5, "USD")
+add_EMA(df, 'USD_Close', 10, "USD")
+add_EMA(df, 'USD_Close', 25, "USD")
+add_EMA(df, 'USD_Close', 50, "USD")
+add_EMA(df, 'USD_Close', 100, "USD")
 
 # %%- get rid of nan
 
@@ -151,8 +196,7 @@ df['Prediction']
 
 # %% - get shape
 df.shape
-df = df.drop(['KC_Open', 'KC_Low', 'USD_Close', 'USD_Open',
-              'USD_High', 'USD_Low', 'USD_Change %'], axis=1)
+
 
 # %% - get train and test sets
 
@@ -257,11 +301,16 @@ def f_importances(coef, names):
     plt.show()
 
 
-feature_names = ['KC_High', 'KC_Close', 'KC_Adj_Close', 'USD_advance', 'KC_SMA_10',
-                 'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
-                 'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ATR_14',
-                 'KC_ADX_14', 'KC_CCI_14', 'KC_ROC_10', 'KC_RSI_14', 'KC_Williams_%R_14',
-                 'KC_Slowk', 'KC_Slowd', ]
+feature_names = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'KC_Adj_Close', 'USD_Close',
+       'USD_Open', 'USD_High', 'USD_Low', 'USD_Change %', 'KC_SMA_10',
+       'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
+       'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14',
+       'KC_CCI_14', 'KC_Slowd', 'USD_ATR_14', 'USD_ATR_10', 'USD_ADX_14',
+       'USD_ADX_10', 'USD_CCI_14', 'USD_CCI_10', 'USD_ROC_10', 'USD_ROC_5',
+       'USD_RSI_14', 'USD_RSI_7', 'USD_Williams_%R_14', 'USD_Williams_%R_7',
+       'USD_Slowk', 'USD_Slowd', 'USD_SMA_5', 'USD_SMA_10', 'USD_SMA_25',
+       'USD_SMA_50', 'USD_SMA_100', 'USD_EMA_5', 'USD_EMA_10', 'USD_EMA_25',
+       'USD_EMA_50', 'USD_EMA_100' ]
 f_importances(model.coef_[0], feature_names)
 
 
@@ -339,3 +388,7 @@ print("accuracy score: ")
 print(accuracy_score(df_test_y, predictions))
 print("confusion matrix: ")
 print(confusion_matrix(df_test_y, predictions))
+
+
+# %%
+df.columns
