@@ -12,6 +12,7 @@ import talib.abstract as ta
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn import svm
 from sklearn.svm import SVC
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
@@ -28,8 +29,8 @@ from sklearn.feature_selection import SelectFromModel
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 
-# own modules
-from prepUsdBrlData import getUsdBrlData
+# %% - predict usd prices
+
 
 # %% - get usd / brl data
 df_exch = getUsdBrlData()
@@ -42,9 +43,8 @@ df = pd.read_csv(
 df = df.dropna()
 
 
-
 # %% - get rid of rows with vol "0"
-# df = df[df['Volume']!=0]
+df = df.drop(['KC_Volume'], axis=1)
 
 # %% - change date to datetime
 
@@ -53,92 +53,118 @@ df['Date'] = pd.to_datetime(
 
 # %% - merge two dataframes on KC data dates
 df = pd.merge(left=df, right=df_exch, left_on='Date', right_on='Date')
-df
+
+
+# %%- get exch rate prediction
+
 
 # %% - set data column as index
 
 df = df.set_index('Date')
 
 # %% - plot closing price
-df['Close'].plot(grid=True)
+df['KC_Close'].plot(grid=True)
+
 plt.title('KCK21 closing prices')
 plt.ylabel('price $')
 plt.show()
 
+df['USD_Close'].plot(grid=True)
+plt.title('USD/BRL closing prices')
+plt.ylabel('BRL')
+plt.show()
+
+
+df['USD_advance'] = np.where(df['USD_Close'].shift(-1) > df['USD_Close'], 1, 0)
+df['USD_advance']
+
 
 # %% - calculate Simple Moving Averages
-def add_SMA(dataframe, colum_name,  period):
-    dataframe['SMA_{}'.format(period)] = dataframe[colum_name].rolling(
+def add_SMA(dataframe, colum_name,  period, commodity):
+    dataframe['{}_SMA_{}'.format(commodity, period)] = dataframe[colum_name].rolling(
         window=period).mean()
 
 
-add_SMA(df, 'Close', 10)
-add_SMA(df, 'Close', 20)
-add_SMA(df, 'Close', 50)
-add_SMA(df, 'Close', 100)
-add_SMA(df, 'Close', 200)
+add_SMA(df, 'KC_Close', 10, "KC")
+add_SMA(df, 'KC_Close', 20, "KC")
+add_SMA(df, 'KC_Close', 50, "KC")
+add_SMA(df, 'KC_Close', 100, "KC")
+add_SMA(df, 'KC_Close', 200, "KC")
+
 
 # %% - calculate Exponential Moving Averages
 
 
-def add_EMA(dataframe, colum_name,  period):
-    dataframe['EMA_{}'.format(period)] = ta.EMA(
+def add_EMA(dataframe, colum_name,  period, commodity):
+    dataframe['{}_EMA_{}'.format(commodity, period)] = ta.EMA(
         dataframe, timeperiod=period, price=colum_name)
 
 
-add_EMA(df, 'Close', 10)
-add_EMA(df, 'Close', 20)
-add_EMA(df, 'Close', 50)
-add_EMA(df, 'Close', 100)
-add_EMA(df, 'Close', 200)
+add_EMA(df, 'KC_Close', 10, "KC")
+add_EMA(df, 'KC_Close', 20, "KC")
+add_EMA(df, 'KC_Close', 50, "KC")
+add_EMA(df, 'KC_Close', 100, "KC")
+add_EMA(df, 'KC_Close', 200, "KC")
+
 
 # %% - calculate Average True Range
 
-df['ATR'] = talib.ATR(df['High'].values, df['Low'].values,
-                      df['Close'].values, timeperiod=14)
+df['KC_ATR_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
+                            df['KC_Close'].values, timeperiod=14)
 
-# %% - calculate Average Directional Index
-df['ADX'] = talib.ADX(df['High'].values, df['Low'].values,
-                      df['Close'].values, timeperiod=14)
+df['KC_ADX_14'] = talib.ADX(df['KC_High'].values, df['KC_Low'].values,
+                            df['KC_Close'].values, timeperiod=14)
 
-# %% - calculate Commodity Channel Index
-df['CCI'] = talib.CCI(df['High'].values, df['Low'].values,
-                      df['Close'].values, timeperiod=14)
+df['KC_CCI_14'] = talib.CCI(df['KC_High'].values, df['KC_Low'].values,
+                            df['KC_Close'].values, timeperiod=14)
 
-# %% - calculate Rate Of Change
-df['ROC'] = talib.ROC(df['Close'], timeperiod=10)
+df['KC_ROC_10'] = talib.ROC(df['KC_Close'], timeperiod=10)
 
-# %% - calculate RElative Strenght Index
-df['RSI'] = talib.RSI(df['Close'], timeperiod=14)
+df['KC_RSI_14'] = talib.RSI(df['KC_Close'], timeperiod=14)
 
-# %% - calculate William's %R
-df['Williams_%R'] = talib.ATR(df['High'].values, df['Low'].values,
-                              df['Close'].values, timeperiod=14)
+df['KC_Williams_%R_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
+                                    df['KC_Close'].values, timeperiod=14)
 
-# %% - stochastic K%D
-df['Slowk'], df['Slowd'] = talib.STOCH(df['High'].values,
-                                       df['Low'].values,
-                                       df['Close'].values, fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
+df['KC_Slowd'] = talib.STOCH(df['KC_High'].values,
+                                             df['KC_Low'].values,
+                                             df['KC_Close'].values,
+                                             fastk_period=5,
+                                             slowk_period=3,
+                                             slowk_matype=0,
+                                             slowd_period=3,
+                                             slowd_matype=0)[1]
+
 
 # %%- get rid of nan
 
 df = df.dropna()
 
+
+# %% -
+# df['Prediction'] = np.where(df['USD_Close'].shift(-1) > df['USD_Close'], 1, 0)
+# df['Prediction']
+
 # %% - add prediction column
 
-df['Prediction'] = np.where(df['Close'].shift(-1) > df['Close'], 1, 0)
+df['Prediction'] = np.where(df['KC_Close'].shift(-1) > df['KC_Close'], 1, 0)
 df['Prediction']
 
 # %% - get shape
 df.shape
+df = df.drop(['KC_Open', 'KC_Low', 'USD_Close', 'USD_Open',
+              'USD_High', 'USD_Low', 'USD_Change %'], axis=1)
 
 # %% - get train and test sets
 
-df_train = df.iloc[:314]
-df_test = df.iloc[314:]
+cutoff = int(round((df.shape[0])*0.8))
 
-df_train_X = df_train.drop(columns=['Prediction'])
-df_test_x = df_test.drop(columns=['Prediction'])
+df_train = df.iloc[:cutoff]
+df_test = df.iloc[cutoff:]
+
+df_train.shape
+
+df_train_X = df_train.drop(['Prediction'], axis=1)
+df_test_x = df_test.drop(['Prediction'], axis=1)
 
 df_train_y = df_train['Prediction']
 df_test_y = df_test['Prediction']
@@ -193,17 +219,62 @@ df_results = batch_classify(X_train_scaled, df_train_y)
 print(df_results.sort_values(by='train_score', ascending=True))
 
 
+# %% - Naive Bayes
+
+model = GaussianNB()
+model.fit(X_train_scaled, df_train_y)
+model
+
+predictions = model.predict(X_test_scaled)
+print("accuracy score: ")
+print(accuracy_score(df_test_y, predictions))
+print("confusion matrix: ")
+print(confusion_matrix(df_test_y, predictions))
+
+
+# %% - SVM Model
+model = SVC(kernel='linear', gamma='auto')
+model.fit(X_train_scaled, df_train_y)
+
+predictions = model.predict(X_test_scaled)
+print("accuracy score: ")
+print(accuracy_score(df_test_y, predictions))
+print("confusion matrix: ")
+print(confusion_matrix(df_test_y, predictions))
+
+
+# %% - check df
+
+df.columns
+# %% - check importance of features
+
+
+def f_importances(coef, names):
+    imp = coef
+    imp, names = zip(*sorted(zip(imp, names)))
+    plt.barh(range(len(names)), imp, align='center')
+    plt.yticks(range(len(names)), names)
+    plt.show()
+
+
+feature_names = ['KC_High', 'KC_Close', 'KC_Adj_Close', 'USD_advance', 'KC_SMA_10',
+                 'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
+                 'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ATR_14',
+                 'KC_ADX_14', 'KC_CCI_14', 'KC_ROC_10', 'KC_RSI_14', 'KC_Williams_%R_14',
+                 'KC_Slowk', 'KC_Slowd', ]
+f_importances(model.coef_[0], feature_names)
+
+
 # %% - Logistic Reg.
 
-# model = LogisticRegression(solver='liblinear', max_iter=5000)
-# model.fit(X_train_scaled,df_train_y)
-# model
+model = LogisticRegression(solver='liblinear', max_iter=5000, dual=True)
+model.fit(X_train_scaled, df_train_y)
 
-# predictions = model.predict(X_test_scaled)
-# print("accuracy score: ")
-# print(accuracy_score(df_test_y,predictions))
-# print("confusion matrix: ")
-# print(confusion_matrix(df_test_y,predictions))
+predictions = model.predict(X_test_scaled)
+print("accuracy score: ")
+print(accuracy_score(df_test_y, predictions))
+print("confusion matrix: ")
+print(confusion_matrix(df_test_y, predictions))
 
 
 # %% - random forest
@@ -220,51 +291,51 @@ print("classification report")
 print(classification_report(df_test_y, predictions))
 
 # %% - ROC curve
-pred_prob = model.predict_proba(X_test_scaled)[:, 1]
-fpr, tpr, thresholds = roc_curve(df_test_y, pred_prob)
-roc_auc = auc(fpr, tpr)
+# pred_prob = model.predict_proba(X_test_scaled)[:, 1]
+# fpr, tpr, thresholds = roc_curve(df_test_y, pred_prob)
+# roc_auc = auc(fpr, tpr)
 
-print("roc auc is:" + str(roc_auc))
-plt.plot([0, 1], [0, 1], "k--")
-plt.plot(fpr, tpr)
-plt.xlabel('False pos. rate')
-plt.ylabel('True pos. rate')
-plt.show()
+# print("roc auc is:" + str(roc_auc))
+# plt.plot([0, 1], [0, 1], "k--")
+# plt.plot(fpr, tpr)
+# plt.xlabel('False pos. rate')
+# plt.ylabel('True pos. rate')
+# plt.show()
 
 
 # %% - gradient boosting
 
-# model = GradientBoostingClassifier()
-# model.fit(X_train_scaled,df_train_y)
-# model
+model = GradientBoostingClassifier()
+model.fit(X_train_scaled, df_train_y)
+model
 
-# predictions = model.predict(X_test_scaled)
-# print("accuracy score: ")
-# print(accuracy_score(df_test_y,predictions))
-# print("confusion matrix: ")
-# print(confusion_matrix(df_test_y,predictions))
+predictions = model.predict(X_test_scaled)
+print("accuracy score: ")
+print(accuracy_score(df_test_y, predictions))
+print("confusion matrix: ")
+print(confusion_matrix(df_test_y, predictions))
 
 # %% - naive bayes
 
-# model = GaussianNB()
-# model.fit(X_train_scaled,df_train_y)
-# model
+model = GaussianNB()
+model.fit(X_train_scaled, df_train_y)
+model
 
-# predictions = model.predict(X_test_scaled)
-# print("accuracy score: ")
-# print(accuracy_score(df_test_y,predictions))
-# print("confusion matrix: ")
-# print(confusion_matrix(df_test_y,predictions))
+predictions = model.predict(X_test_scaled)
+print("accuracy score: ")
+print(accuracy_score(df_test_y, predictions))
+print("confusion matrix: ")
+print(confusion_matrix(df_test_y, predictions))
 
 
 # =======================================================
 # %% - pick the most accurate and test
-# knn_model = KNeighborsClassifier()
-# knn_model.fit(X_train_scaled,df_train_y)
+knn_model = KNeighborsClassifier()
+knn_model.fit(X_train_scaled, df_train_y)
 
-# # %% - predict on test set
-# predictions = knn_model.predict(X_test_scaled)
-# print("accuracy score: ")
-# print(accuracy_score(df_test_y,predictions))
-# print("confusion matrix: ")
-# print(confusion_matrix(df_test_y,predictions))
+# predict on test set
+predictions = knn_model.predict(X_test_scaled)
+print("accuracy score: ")
+print(accuracy_score(df_test_y, predictions))
+print("confusion matrix: ")
+print(confusion_matrix(df_test_y, predictions))
