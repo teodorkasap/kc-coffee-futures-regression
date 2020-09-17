@@ -195,7 +195,208 @@ df['Prediction'] = np.where(df['KC_Close'].shift(-1) > df['KC_Close'], 1, 0)
 df['Prediction']
 
 # %% - get shape
-df.shape
+df
+
+
+# %% - get train and test sets
+
+# cutoff = int(round((df.shape[0])*0.8))
+
+# df_train = df.iloc[:cutoff]
+# df_test = df.iloc[cutoff:]
+
+# df_train.shape
+
+# df_train_X = df_train.drop(['Prediction'], axis=1)
+# df_test_x = df_test.drop(['Prediction'], axis=1)
+
+# df_train_y = df_train['Prediction']
+# df_test_y = df_test['Prediction']
+
+# %% - Normalize data
+
+# scaler = MinMaxScaler(feature_range=(0, 1))
+# X_train_scaled = scaler.fit_transform(df_train_X)
+# X_test_scaled = scaler.transform(df_test_x)
+
+
+# %% - Classification models
+
+# classification_models = {
+#     "Logistic Regression": LogisticRegression(solver='lbfgs', max_iter=5000),
+#     "Nearest Neighbors": KNeighborsClassifier(),
+#     "Support Vector Machine": SVC(gamma="auto"),
+#     "Gradient Boosting Classifier": GradientBoostingClassifier(),
+#     "Decision Tree": DecisionTreeClassifier(),
+#     "Random Forest": RandomForestClassifier(n_estimators=100),
+#     "Neural Net": MLPClassifier(solver='adam', alpha=0.001, learning_rate='constant', learning_rate_init=0.001),
+#     "Naive Bayes": GaussianNB()
+# }
+
+# no_classifiers = len(classification_models.keys())
+
+# %% - batch training and results
+
+
+# def batch_classify(df_train_scaled, df_test, verbose=True):
+#     df_results = pd.DataFrame(data=np.zeros(shape=(no_classifiers, 3)),
+#                               columns=['classfier', 'train_score', 'training_time'])
+#     count = 0
+#     for key, classifier in classification_models.items():
+#         t_start = time.process_time()
+#         classifier.fit(X_train_scaled, df_train_y)
+#         t_end = time.process_time()
+#         elapsed_time = t_end - t_start
+#         train_score = classifier.score(X_train_scaled, df_train_y)
+#         df_results.loc[count, 'classfier'] = key
+#         df_results.loc[count, 'train_score'] = train_score
+#         df_results.loc[count, 'training_time'] = elapsed_time
+#         if verbose:
+#             print("trained {c} in {f:.2f}s".format(c=key, f=elapsed_time))
+#         count += 1
+#     return df_results
+
+
+# %% - train models
+
+# df_results = batch_classify(X_train_scaled, df_train_y)
+# print(df_results.sort_values(by='train_score', ascending=True))
+
+
+# %% - Naive Bayes
+
+# model = GaussianNB()
+# model.fit(X_train_scaled, df_train_y)
+# model
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
+
+
+# %% - SVM Model
+# model = SVC(kernel='linear', gamma='auto')
+# model.fit(X_train_scaled, df_train_y)
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
+
+
+# %% - check df
+
+df.columns
+# %% - check importance of features
+
+
+# def f_importances(coef, names):
+#     imp = coef
+#     imp, names = zip(*sorted(zip(imp, names)))
+#     plt.barh(range(len(names)), imp, align='center')
+#     plt.yticks(range(len(names)), names)
+#     plt.show()
+
+
+# feature_names = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'KC_Adj_Close', 'USD_Close',
+#                  'USD_Open', 'USD_High', 'USD_Low', 'USD_Change %', 'KC_SMA_10',
+#                  'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
+#                  'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14',
+#                  'KC_CCI_14', 'KC_Slowd', 'USD_ATR_14', 'USD_ATR_10', 'USD_ADX_14',
+#                  'USD_ADX_10', 'USD_CCI_14', 'USD_CCI_10', 'USD_ROC_10', 'USD_ROC_5',
+#                  'USD_RSI_14', 'USD_RSI_7', 'USD_Williams_%R_14', 'USD_Williams_%R_7',
+#                  'USD_Slowk', 'USD_Slowd', 'USD_SMA_5', 'USD_SMA_10', 'USD_SMA_25',
+#                  'USD_SMA_50', 'USD_SMA_100', 'USD_EMA_5', 'USD_EMA_10', 'USD_EMA_25',
+#                  'USD_EMA_50', 'USD_EMA_100']
+# f_importances(model.coef_[0], feature_names)
+
+
+# %% - Logistic Reg.
+
+# model = LogisticRegression(solver='liblinear', max_iter=5000, dual=True)
+# model.fit(X_train_scaled, df_train_y)
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
+
+
+# %% - random forest
+
+# model = RandomForestClassifier(n_estimators=1000, min_samples_leaf=1)
+# model.fit(X_train_scaled, df_train_y)
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
+# print("classification report")
+# print(classification_report(df_test_y, predictions))
+
+# %% - ROC curve
+# pred_prob = model.predict_proba(X_test_scaled)[:, 1]
+# fpr, tpr, thresholds = roc_curve(df_test_y, pred_prob)
+# roc_auc = auc(fpr, tpr)
+
+# print("roc auc is:" + str(roc_auc))
+# plt.plot([0, 1], [0, 1], "k--")
+# plt.plot(fpr, tpr)
+# plt.xlabel('False pos. rate')
+# plt.ylabel('True pos. rate')
+# plt.show()
+
+
+# %% - gradient boosting
+
+# model = GradientBoostingClassifier()
+# model.fit(X_train_scaled, df_train_y)
+# model
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
+
+# %% - naive bayes
+
+# model = GaussianNB()
+# model.fit(X_train_scaled, df_train_y)
+# model
+
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
+
+
+# =======================================================
+# %% - pick the most accurate and test
+# knn_model = KNeighborsClassifier()
+# knn_model.fit(X_train_scaled, df_train_y)
+
+# # predict on test set
+# predictions = knn_model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
+
+
+# %% -select best features for SVM
+# df = df[['KC_Open', 'KC_CCI_14', 'USD_Slowk',
+#          'KC_Low', 'KC_High', 'USD_CCI_14',
+#          'USD_RSI_14', 'USD_ADX_14', 'USD_ADX_10',
+#          'KC_ADX_14', 'USD_Open', 'USD_Williams_%R_14',
+#          'USD_Williams_%R_7', 'USD_ATR_10', 'USD_ROC_10','Prediction',
+#          'USD_ROC_5', 'USD_ATR_14']]
 
 
 # %% - get train and test sets
@@ -220,175 +421,24 @@ X_train_scaled = scaler.fit_transform(df_train_X)
 X_test_scaled = scaler.transform(df_test_x)
 
 
-# %% - Classification models
-
-classification_models = {
-    "Logistic Regression": LogisticRegression(solver='lbfgs', max_iter=5000),
-    "Nearest Neighbors": KNeighborsClassifier(),
-    "Support Vector Machine": SVC(gamma="auto"),
-    "Gradient Boosting Classifier": GradientBoostingClassifier(),
-    "Decision Tree": DecisionTreeClassifier(),
-    "Random Forest": RandomForestClassifier(n_estimators=100),
-    "Neural Net": MLPClassifier(solver='adam', alpha=0.001, learning_rate='constant', learning_rate_init=0.001),
-    "Naive Bayes": GaussianNB()
-}
-
-no_classifiers = len(classification_models.keys())
-
-# %% - batch training and results
-
-
-def batch_classify(df_train_scaled, df_test, verbose=True):
-    df_results = pd.DataFrame(data=np.zeros(shape=(no_classifiers, 3)),
-                              columns=['classfier', 'train_score', 'training_time'])
-    count = 0
-    for key, classifier in classification_models.items():
-        t_start = time.process_time()
-        classifier.fit(X_train_scaled, df_train_y)
-        t_end = time.process_time()
-        elapsed_time = t_end - t_start
-        train_score = classifier.score(X_train_scaled, df_train_y)
-        df_results.loc[count, 'classfier'] = key
-        df_results.loc[count, 'train_score'] = train_score
-        df_results.loc[count, 'training_time'] = elapsed_time
-        if verbose:
-            print("trained {c} in {f:.2f}s".format(c=key, f=elapsed_time))
-        count += 1
-    return df_results
-
-
-# %% - train models
-
-df_results = batch_classify(X_train_scaled, df_train_y)
-print(df_results.sort_values(by='train_score', ascending=True))
-
-
-# %% - Naive Bayes
-
-model = GaussianNB()
-model.fit(X_train_scaled, df_train_y)
-model
+# %% - build and train model
+model = SVC(kernel='linear', gamma='auto',probability=True)
+probas_ = model.fit(X_train_scaled, df_train_y).predict_proba(X_test_scaled)
 
 predictions = model.predict(X_test_scaled)
 print("accuracy score: ")
 print(accuracy_score(df_test_y, predictions))
 print("confusion matrix: ")
 print(confusion_matrix(df_test_y, predictions))
-
-
-# %% - SVM Model
-model = SVC(kernel='linear', gamma='auto')
-model.fit(X_train_scaled, df_train_y)
-
-predictions = model.predict(X_test_scaled)
-print("accuracy score: ")
-print(accuracy_score(df_test_y, predictions))
-print("confusion matrix: ")
-print(confusion_matrix(df_test_y, predictions))
-
-
-# %% - check df
-
-df.columns
-# %% - check importance of features
-
-
-def f_importances(coef, names):
-    imp = coef
-    imp, names = zip(*sorted(zip(imp, names)))
-    plt.barh(range(len(names)), imp, align='center')
-    plt.yticks(range(len(names)), names)
-    plt.show()
-
-
-feature_names = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'KC_Adj_Close', 'USD_Close',
-       'USD_Open', 'USD_High', 'USD_Low', 'USD_Change %', 'KC_SMA_10',
-       'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
-       'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14',
-       'KC_CCI_14', 'KC_Slowd', 'USD_ATR_14', 'USD_ATR_10', 'USD_ADX_14',
-       'USD_ADX_10', 'USD_CCI_14', 'USD_CCI_10', 'USD_ROC_10', 'USD_ROC_5',
-       'USD_RSI_14', 'USD_RSI_7', 'USD_Williams_%R_14', 'USD_Williams_%R_7',
-       'USD_Slowk', 'USD_Slowd', 'USD_SMA_5', 'USD_SMA_10', 'USD_SMA_25',
-       'USD_SMA_50', 'USD_SMA_100', 'USD_EMA_5', 'USD_EMA_10', 'USD_EMA_25',
-       'USD_EMA_50', 'USD_EMA_100' ]
-f_importances(model.coef_[0], feature_names)
-
-
-# %% - Logistic Reg.
-
-model = LogisticRegression(solver='liblinear', max_iter=5000, dual=True)
-model.fit(X_train_scaled, df_train_y)
-
-predictions = model.predict(X_test_scaled)
-print("accuracy score: ")
-print(accuracy_score(df_test_y, predictions))
-print("confusion matrix: ")
-print(confusion_matrix(df_test_y, predictions))
-
-
-# %% - random forest
-
-model = RandomForestClassifier(n_estimators=1000, min_samples_leaf=1)
-model.fit(X_train_scaled, df_train_y)
-
-predictions = model.predict(X_test_scaled)
-print("accuracy score: ")
-print(accuracy_score(df_test_y, predictions))
-print("confusion matrix: ")
-print(confusion_matrix(df_test_y, predictions))
-print("classification report")
-print(classification_report(df_test_y, predictions))
 
 # %% - ROC curve
-# pred_prob = model.predict_proba(X_test_scaled)[:, 1]
-# fpr, tpr, thresholds = roc_curve(df_test_y, pred_prob)
-# roc_auc = auc(fpr, tpr)
+pred_prob = model.predict_proba(X_test_scaled)[:, 1]
+fpr, tpr, thresholds = roc_curve(df_test_y, probas_[:, 1])
+roc_auc = auc(fpr, tpr)
 
-# print("roc auc is:" + str(roc_auc))
-# plt.plot([0, 1], [0, 1], "k--")
-# plt.plot(fpr, tpr)
-# plt.xlabel('False pos. rate')
-# plt.ylabel('True pos. rate')
-# plt.show()
-
-
-# %% - gradient boosting
-
-model = GradientBoostingClassifier()
-model.fit(X_train_scaled, df_train_y)
-model
-
-predictions = model.predict(X_test_scaled)
-print("accuracy score: ")
-print(accuracy_score(df_test_y, predictions))
-print("confusion matrix: ")
-print(confusion_matrix(df_test_y, predictions))
-
-# %% - naive bayes
-
-model = GaussianNB()
-model.fit(X_train_scaled, df_train_y)
-model
-
-predictions = model.predict(X_test_scaled)
-print("accuracy score: ")
-print(accuracy_score(df_test_y, predictions))
-print("confusion matrix: ")
-print(confusion_matrix(df_test_y, predictions))
-
-
-# =======================================================
-# %% - pick the most accurate and test
-knn_model = KNeighborsClassifier()
-knn_model.fit(X_train_scaled, df_train_y)
-
-# predict on test set
-predictions = knn_model.predict(X_test_scaled)
-print("accuracy score: ")
-print(accuracy_score(df_test_y, predictions))
-print("confusion matrix: ")
-print(confusion_matrix(df_test_y, predictions))
-
-
-# %%
-df.columns
+print("roc auc is:" + str(roc_auc))
+plt.plot([0, 1], [0, 1], "k--")
+plt.plot(fpr, tpr)
+plt.xlabel('False pos. rate')
+plt.ylabel('True pos. rate')
+plt.show()
