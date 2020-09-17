@@ -1,6 +1,3 @@
-# %% - source
-# https://medium.com/analytics-vidhya/stock-trend-prediction-with-technical-indicators-feature-engineering-and-python-code-1fa54d5806ba
-
 # %% - imports
 from prepUsdBrlData import getUsdBrlData
 import time
@@ -9,6 +6,7 @@ import pandas as pd
 import numpy as np
 import talib
 import talib.abstract as ta
+from sklearn.preprocessing import MinMaxScaler
 
 
 # This is for multiple print statements per cell
@@ -170,6 +168,10 @@ add_EMA(df, 'USD_Close', 100, "USD")
 
 df = df.dropna()
 
+
+df['Prediction'] = np.where(df['KC_Close'].shift(-1) > df['KC_Close'], 1, 0)
+df['Prediction']
+
 # %% - shape input dataframe for lstm model
 
 def lstm_data_transform(x_data, y_data, num_steps=5):
@@ -200,3 +202,27 @@ def lstm_data_transform(x_data, y_data, num_steps=5):
 
 
 # %% - train test split
+train_ind = int(0.8 * df.shape[0])
+df_train = df[:train_ind]
+df_train = df_train[:train_ind]
+df_val = df_train[train_ind:]
+df_test = df[train_ind:]
+
+
+
+df_train_X = df_train.drop(['Prediction'], axis=1)
+df_val_X = df_val.drop(['Prediction'], axis=1)
+df_test_X = df_test.drop(['Prediction'], axis=1)
+
+
+
+
+df_train_y = df_train['Prediction']
+df_test_y = df_test['Prediction']
+df_val_y = df_val['Prediction']
+
+# %% - scaling training and validation sets
+sc = MinMaxScaler(feature_range=(0, 1))
+training_set_scaled = sc.fit_transform(df_train_X)
+val_set_scaled = sc.transform(df_val_X)
+test_set_scaled = sc.transform(df_test_X)
