@@ -7,6 +7,10 @@ import numpy as np
 import talib
 import talib.abstract as ta
 from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM,Dense
+from tensorflow.keras.optimizers import Adam
+
 
 
 # This is for multiple print statements per cell
@@ -172,7 +176,7 @@ df = df.dropna()
 df['Prediction'] = np.where(df['KC_Close'].shift(-1) > df['KC_Close'], 1, 0)
 df['Prediction']
 
-# %% - shape input dataframe for lstm model
+# %% - generic function to shape input dataframe for lstm model
 
 def lstm_data_transform(x_data, y_data, num_steps=5):
 
@@ -204,10 +208,14 @@ def lstm_data_transform(x_data, y_data, num_steps=5):
 # %% - train test split
 train_ind = int(0.8 * df.shape[0])
 df_train = df[:train_ind]
-df_train = df_train[:train_ind]
-df_val = df_train[train_ind:]
+df_train.shape
+val_ind = int(0.8 * df_train.shape[0])
+val_ind
+df_val = df_train[val_ind:]
+df_train = df_train[:val_ind]
 df_test = df[train_ind:]
-
+df_train.shape
+df_val.shape
 
 
 df_train_X = df_train.drop(['Prediction'], axis=1)
@@ -223,6 +231,35 @@ df_val_y = df_val['Prediction']
 
 # %% - scaling training and validation sets
 sc = MinMaxScaler(feature_range=(0, 1))
-training_set_scaled = sc.fit_transform(df_train_X)
-val_set_scaled = sc.transform(df_val_X)
-test_set_scaled = sc.transform(df_test_X)
+X_training_set_scaled = sc.fit_transform(df_train_X)
+x_val_set_scaled = sc.transform(df_val_X)
+x_test_set_scaled = sc.transform(df_test_X)
+
+# %% - reshape training data for keras lstm
+
+num_steps = 1
+# training set
+(x_train_transformed,
+y_train_transformed) = lstm_data_transform(X_training_set_scaled,df_train_y, num_steps=num_steps)
+assert x_train_transformed.shape[0] == y_train_transformed.shape[0]
+
+# %% - reshape test data for keras lstm
+
+# test set
+(x_test_transformed,
+y_test_transformed) = lstm_data_transform(x_test_set_scaled,df_test_y, num_steps=num_steps)
+assert x_test_transformed.shape[0] ==y_test_transformed.shape[0]
+
+
+# %% check shapes of all transformed dfs
+print(x_train_transformed.shape,y_train_transformed.shape,x_test_transformed.shape,y_test_transformed.shape)
+
+# %% - build model
+
+model = Sequential()
+model.add(LSTM(20, activation='tanh', input_shape=(num_steps,
+3), return_sequences=False))
+model.add(Dense(units=20, activation='relu'))
+model.add(Dense(units=1, activation='linear'))
+adam = Adam(lr=0.001)
+model.compile(optimizer=adam, loss='mse')
