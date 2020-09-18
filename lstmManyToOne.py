@@ -6,11 +6,12 @@ import pandas as pd
 import numpy as np
 import talib
 import talib.abstract as ta
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM,Dense
-from tensorflow.keras.optimizers import Adam
 
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import LSTM, Dense, Embedding
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
 # This is for multiple print statements per cell
@@ -178,6 +179,7 @@ df['Prediction']
 
 # %% - generic function to shape input dataframe for lstm model
 
+
 def lstm_data_transform(x_data, y_data, num_steps=5):
 
     # Prepare the list for the transformed data
@@ -185,7 +187,7 @@ def lstm_data_transform(x_data, y_data, num_steps=5):
 
     # Loop of the entire data set
     for i in range(x_data.shape[0]):
-    # compute a new (sliding window) index
+        # compute a new (sliding window) index
         end_ix = i + num_steps
 
     # if index is larger than the size of the dataset, we stop
@@ -223,8 +225,6 @@ df_val_X = df_val.drop(['Prediction'], axis=1)
 df_test_X = df_test.drop(['Prediction'], axis=1)
 
 
-
-
 df_train_y = df_train['Prediction']
 df_test_y = df_test['Prediction']
 df_val_y = df_val['Prediction']
@@ -240,26 +240,120 @@ x_test_set_scaled = sc.transform(df_test_X)
 num_steps = 1
 # training set
 (x_train_transformed,
-y_train_transformed) = lstm_data_transform(X_training_set_scaled,df_train_y, num_steps=num_steps)
+ y_train_transformed) = lstm_data_transform(X_training_set_scaled, df_train_y, num_steps=num_steps)
+assert x_train_transformed.shape[0] == y_train_transformed.shape[0]
+
+# %% -reshape validation data for keras lstm
+(x_val_transformed,
+ y_val_transformed) = lstm_data_transform(x_val_set_scaled, df_val_y, num_steps=num_steps)
 assert x_train_transformed.shape[0] == y_train_transformed.shape[0]
 
 # %% - reshape test data for keras lstm
 
 # test set
 (x_test_transformed,
-y_test_transformed) = lstm_data_transform(x_test_set_scaled,df_test_y, num_steps=num_steps)
-assert x_test_transformed.shape[0] ==y_test_transformed.shape[0]
+ y_test_transformed) = lstm_data_transform(x_test_set_scaled, df_test_y, num_steps=num_steps)
+assert x_test_transformed.shape[0] == y_test_transformed.shape[0]
 
 
 # %% check shapes of all transformed dfs
-print(x_train_transformed.shape,y_train_transformed.shape,x_test_transformed.shape,y_test_transformed.shape)
+print(x_train_transformed.shape, y_train_transformed.shape,
+      x_test_transformed.shape, y_test_transformed.shape)
 
 # %% - build model
 
-model = Sequential()
-model.add(LSTM(20, activation='tanh', input_shape=(num_steps,
-3), return_sequences=False))
-model.add(Dense(units=20, activation='relu'))
-model.add(Dense(units=1, activation='linear'))
-adam = Adam(lr=0.001)
-model.compile(optimizer=adam, loss='mse')
+# model = Sequential()
+# model.add(LSTM(256, activation='tanh', input_shape=(x_train_transformed.shape[1], x_train_transformed.shape[2]), return_sequences=False))
+# # model.add(Dense(units=20, activation='relu'))
+# model.add(Dense(units=1, activation='sigmoid'))
+# adam = Adam(lr=0.001)
+# model.compile(optimizer=adam, loss='binary_crossentropy',metrics=['accuracy'])
+# model.summary()
+
+
+# %% - early stopping callback
+
+# early_stop = EarlyStopping(monitor='val_loss', patience=2)
+
+# %% - model checkpoint
+# filepath="weights-improvement-{epoch:02d}-{val_accuracy:.2f}.hdf5"
+# checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+
+# %% - train model
+# # history = model.fit(x_train_transformed, y_train_transformed, epochs=10, validation_data=(x_val_transformed,y_val_transformed), batch_size=5, verbose=2, callbacks=[early_stop])
+# history = model.fit(x_train_transformed, y_train_transformed, epochs=100, validation_data=(x_val_transformed,y_val_transformed), batch_size=1, verbose=2, callbacks=[checkpoint])
+
+
+# %% - mehtods to re-create model and load weights
+
+def create_model():
+    model = Sequential()
+    model.add(LSTM(256, activation='tanh', input_shape=(
+        x_train_transformed.shape[1], x_train_transformed.shape[2]), return_sequences=False))
+    # model.add(Dense(units=20, activation='relu'))
+    model.add(Dense(units=1, activation='sigmoid'))
+    adam = Adam(lr=0.001)
+    model.compile(optimizer=adam, loss='binary_crossentropy',
+                  metrics=['accuracy'])
+    model.summary()
+    return model
+
+
+def load_trained_model(weights_path):
+    model = create_model()
+    model.load_weights(weights_path)
+
+# %% - load model
+
+# model_generic = create_model()
+
+# returns a compiled model
+# identical to the previous one
+
+# model1= model_generic.load_weights('weights-improvement-55-0.62.hdf5')
+# model2 = model_generic.load_weights('weights-improvement-59-0.64.hdf5')
+
+
+model1 = load_model('weights-improvement-55-0.62.hdf5')
+model2 = load_model('weights-improvement-59-0.64.hdf5')
+
+model1.summary()
+model2.summary()
+
+
+# %% - predictions
+
+predictions1 = model1.predict(x_test_transformed)
+predictions2 = model2.predict(x_test_transformed)
+
+# %% - check predictions against actual data
+df_pred_comparison1 = pd.DataFrame.from_records(
+    predictions1, columns=['Predictions1'])
+df_pred_comparison2 = pd.DataFrame.from_records(
+    predictions2, columns=['Predictions2'])
+df_pred_comparison1
+df_pred_comparison2
+
+# %% - make preds binary
+# df_test_y
+
+df_pred_comparison1['Pred_bin'] = np.where(
+    df_pred_comparison1['Predictions1'] > 0.5, 1, 0)
+df_test_y = pd.Series.to_frame(df_test_y)
+df_test_y
+
+
+df_pred_comparison1.shape
+df_test_y = df_test_y.iloc[1:]
+df_test_y.shape
+df_test_y=df_test_y.set_index(df_pred_comparison1.index)
+df_pred_comparison1['Actual_bin'] = pd.Series(df_test_y['Prediction'])
+df_pred_comparison1
+
+# %% get number of true pred
+seriesObj = df_pred_comparison1.apply(lambda x: True if x['Actual_bin'] == x['Pred_bin'] else False , axis=1)
+
+# %%
+numOfRows = len(seriesObj[seriesObj == True].index)
+numOfRows
+len(df_pred_comparison1.index)
