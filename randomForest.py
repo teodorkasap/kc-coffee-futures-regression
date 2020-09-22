@@ -10,7 +10,7 @@ import numpy as np
 import talib
 import talib.abstract as ta
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.ensemble import AdaBoostRegressor
+from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.metrics import mean_squared_error
 
@@ -238,25 +238,13 @@ y_test = df_test['KC_Close']
 
 # %% - build model
 
-ada_reg = AdaBoostRegressor(n_estimators=100)
-ada_reg.fit(X_train, y_train)
+rf_reg = RandomForestRegressor(n_estimators = 10000, random_state = 0)
 
-# %% - validation
-scores = cross_val_score(ada_reg, X_train, y_train, cv=5)
-print("Mean cross-validataion score: %.2f" % scores.mean())
+rf_reg.fit(X_train, y_train)
 
+# %% prediction
+ypred = rf_reg.predict(x_test)  # test the output by changing values 
 
-kfold = KFold(n_splits=10, shuffle=True)
-kf_cv_scores = cross_val_score(ada_reg, X_train, y_train, cv=kfold )
-print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
-
-
-# %% - predictions
-
-ypred = ada_reg.predict(x_test)
-mse = mean_squared_error(y_test,ypred)
-print("MSE: %.2f" % mse)
-print("RMSE: %.2f" % np.sqrt(mse))
 
 # %% - plot predictions vs actual
 
@@ -265,3 +253,13 @@ plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
 plt.plot(x_ax, ypred, lw=0.8, color="red", label="predicted")
 plt.legend()
 plt.show()
+
+
+# %% - validation
+scores = cross_val_score(rf_reg, X_train, y_train, cv=5)
+print("Mean cross-validataion score: %.2f" % scores.mean())
+
+
+kfold = KFold(n_splits=10, shuffle=True)
+kf_cv_scores = cross_val_score(rf_reg, X_train, y_train, cv=kfold )
+print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
