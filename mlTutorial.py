@@ -34,6 +34,13 @@ InteractiveShell.ast_node_interactivity = "all"
 
 # %% - get usd / brl data
 df_exch = getUsdBrlData()
+columns_shift = ['USD_Close',	"USD_Open",	"USD_High",	"USD_Low",	"USD_Change %"]
+# df_exch['USD_Close',	"USD_Open",	"USD_High",	"USD_Low",	"USD_Change %"] = df_exch[['USD_Close',	"USD_Open",	"USD_High",	"USD_Low",	"USD_Change %"]].shift(-1)
+
+for column in columns_shift:
+    df_exch[column] = df_exch[column].shift(-1)
+
+df_exch
 
 # %% - get KC data
 df = pd.read_csv(
@@ -41,7 +48,11 @@ df = pd.read_csv(
 
 # %% - drop nan
 df = df.dropna()
+columns_shift = []
+for column in columns_shift:
+    df[column] = df[column].shift(-1)
 
+df
 
 # %% - get rid of rows with vol "0"
 df = df.drop(['KC_Volume'], axis=1)
@@ -50,6 +61,7 @@ df = df.drop(['KC_Volume'], axis=1)
 
 df['Date'] = pd.to_datetime(
     df['Date'], format='%Y-%m-%d', errors='coerce')
+
 
 # %% - merge two dataframes on KC data dates
 df = pd.merge(left=df, right=df_exch, left_on='Date', right_on='Date')
@@ -192,9 +204,22 @@ df = df.dropna()
 # %% - add prediction column
 
 df['Prediction'] = np.where(df['KC_Close'].shift(-1) > df['KC_Close'], 1, 0)
-df['Prediction']
+df
+
+# %%
+df.columns
+
+# %% shift kc related columns
+
+columns_shift = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'KC_Adj_Close','KC_SMA_10',
+       'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
+       'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14',
+       'KC_CCI_14', 'KC_Slowd']
+for column in columns_shift:
+    df[column] = df[column].shift()
 
 # %% - get shape
+df=df.dropna()
 df
 
 
@@ -288,6 +313,9 @@ df
 
 
 # %% - check df
+
+corrMatrix = df.corr()
+print (corrMatrix)
 
 df.columns
 # %% - check importance of features
@@ -401,44 +429,44 @@ df.columns
 
 # %% - get train and test sets
 
-cutoff = int(round((df.shape[0])*0.8))
+# cutoff = int(round((df.shape[0])*0.8))
 
-df_train = df.iloc[:cutoff]
-df_test = df.iloc[cutoff:]
+# df_train = df.iloc[:cutoff]
+# df_test = df.iloc[cutoff:]
 
-df_train.shape
+# df_train.shape
 
-df_train_X = df_train.drop(['Prediction'], axis=1)
-df_test_x = df_test.drop(['Prediction'], axis=1)
+# df_train_X = df_train.drop(['Prediction'], axis=1)
+# df_test_x = df_test.drop(['Prediction'], axis=1)
 
-df_train_y = df_train['Prediction']
-df_test_y = df_test['Prediction']
+# df_train_y = df_train['Prediction']
+# df_test_y = df_test['Prediction']
 
-# %% - Normalize data
+# # %% - Normalize data
 
-scaler = MinMaxScaler(feature_range=(0, 1))
-X_train_scaled = scaler.fit_transform(df_train_X)
-X_test_scaled = scaler.transform(df_test_x)
+# scaler = MinMaxScaler(feature_range=(0, 1))
+# X_train_scaled = scaler.fit_transform(df_train_X)
+# X_test_scaled = scaler.transform(df_test_x)
 
 
-# %% - build and train model
-model = SVC(kernel='linear', gamma='auto',probability=True)
-probas_ = model.fit(X_train_scaled, df_train_y).predict_proba(X_test_scaled)
+# # %% - build and train model
+# model = SVC(kernel='linear', gamma='auto',probability=True)
+# probas_ = model.fit(X_train_scaled, df_train_y).predict_proba(X_test_scaled)
 
-predictions = model.predict(X_test_scaled)
-print("accuracy score: ")
-print(accuracy_score(df_test_y, predictions))
-print("confusion matrix: ")
-print(confusion_matrix(df_test_y, predictions))
+# predictions = model.predict(X_test_scaled)
+# print("accuracy score: ")
+# print(accuracy_score(df_test_y, predictions))
+# print("confusion matrix: ")
+# print(confusion_matrix(df_test_y, predictions))
 
-# %% - ROC curve
-pred_prob = model.predict_proba(X_test_scaled)[:, 1]
-fpr, tpr, thresholds = roc_curve(df_test_y, probas_[:, 1])
-roc_auc = auc(fpr, tpr)
+# # %% - ROC curve
+# pred_prob = model.predict_proba(X_test_scaled)[:, 1]
+# fpr, tpr, thresholds = roc_curve(df_test_y, probas_[:, 1])
+# roc_auc = auc(fpr, tpr)
 
-print("roc auc is:" + str(roc_auc))
-plt.plot([0, 1], [0, 1], "k--")
-plt.plot(fpr, tpr)
-plt.xlabel('False pos. rate')
-plt.ylabel('True pos. rate')
-plt.show()
+# print("roc auc is:" + str(roc_auc))
+# plt.plot([0, 1], [0, 1], "k--")
+# plt.plot(fpr, tpr)
+# plt.xlabel('False pos. rate')
+# plt.ylabel('True pos. rate')
+# plt.show()
