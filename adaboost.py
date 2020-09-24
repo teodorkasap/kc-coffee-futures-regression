@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import AdaBoostRegressor, GradientBoostingRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.metrics import mean_squared_error
-
+import xgboost
 
 # This is for multiple print statements per cell
 from IPython.core.interactiveshell import InteractiveShell
@@ -263,6 +263,7 @@ print("RMSE: %.2f" % np.sqrt(mse))
 # %% - plot predictions vs actual
 
 x_ax = range(len(y_test))
+x_ax = range(len(y_test))
 plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
 plt.plot(x_ax, ypred, lw=0.8, color="red", label="predicted")
 plt.legend()
@@ -271,7 +272,7 @@ plt.show()
 
 # %% - build model -grad. boost
 
-grad_reg = GradientBoostingRegressor(n_estimators=250,warm_start=True, subsample=0.8,max_depth=1)
+grad_reg = GradientBoostingRegressor(n_estimators=250,warm_start=True, subsample=0.8,max_depth=1,criterion="mse")
 grad_reg.fit(X_train, y_train)
 
 # %% - validation
@@ -286,8 +287,10 @@ print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
 # %% - predictions
 
+
 ypred = grad_reg.predict(x_test)
-mse = mean_squared_error(y_test,ypred)
+# mse_train = mean_squared_error(X_train,y_train)
+mse_test = mean_squared_error(y_test,ypred)
 print("MSE: %.2f" % mse)
 print("RMSE: %.2f" % np.sqrt(mse))
 
@@ -310,3 +313,36 @@ preds_actual_df
 pd.set_option("display.max_rows", None)
 preds_actual_df['Actual'] = y_test.values
 preds_actual_df
+
+
+# %% - xgboost model
+
+regressor = xgboost.XGBRegressor(
+    # n_estimators=35,
+    # reg_lambda=1,
+    # gamma=0.5,
+    # max_depth=3,
+    # subsample= 0.5,
+    # tree_method = 'exact'
+    booster="gblinear",
+    
+
+)
+
+regressor.fit(X_train, y_train, )
+
+
+# %% - predict
+y_pred = regressor.predict(x_test)
+# %%  - MSE
+mean_squared_error(y_test, y_pred)
+
+# %%
+
+
+x_ax = range(len(y_test))
+x_ax = range(len(y_test))
+plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
+plt.plot(x_ax, ypred, lw=0.8, color="red", label="predicted")
+plt.legend()
+plt.show()
