@@ -1,3 +1,5 @@
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import cross_val_score, KFold
 from prepUsdBrlData import getUsdBrlData
 import time
 import matplotlib.pyplot as plt
@@ -162,6 +164,100 @@ add_EMA(df, 'USD_Close', 100, "USD")
 df = df.dropna()
 
 # %%
-df=df.drop(['KC_Adj Close'],axis=1)
+df = df.drop(['KC_Adj_Close'], axis=1)
 
+# %%
+df["target"] = df["KC_Close"]
+
+columns_shift = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'USD_Close', 'USD_Open',
+                 'USD_High', 'USD_Low', 'USD_Change %', 'KC_SMA_10', 'KC_SMA_20',
+                 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10', 'KC_EMA_20',
+                 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14', 'KC_CCI_14',
+                 'KC_Slowd', 'USD_ATR_14', 'USD_ATR_10', 'USD_ADX_14', 'USD_ADX_10',
+                 'USD_CCI_14', 'USD_CCI_10', 'USD_ROC_10', 'USD_ROC_5', 'USD_RSI_14',
+                 'USD_RSI_7', 'USD_Williams_%R_14', 'USD_Williams_%R_7', 'USD_Slowk',
+                 'USD_Slowd', 'USD_SMA_5', 'USD_SMA_10', 'USD_SMA_25', 'USD_SMA_50',
+                 'USD_SMA_100', 'USD_EMA_5', 'USD_EMA_10', 'USD_EMA_25', 'USD_EMA_50',
+                 'USD_EMA_100']
+
+
+for column in columns_shift:
+    df[column] = df[column].shift(1)
+
+# %%
+df = df.dropna()
 df
+
+
+# %% - get train and test sets
+
+cutoff = int(round((df.shape[0])*0.8))
+
+df_train = df.iloc[:cutoff]
+df_test = df.iloc[cutoff:]
+
+
+X_train = df_train.drop(['target'], axis=1)
+x_test = df_test.drop(['target'], axis=1)
+
+y_train = df_train['target']
+y_test = df_test['target']
+
+
+X_train.shape, y_train.shape, x_test.shape, y_test.shape
+
+# %% - scale dataset
+
+sc = StandardScaler()
+X_train_sc = sc.fit_transform(X_train)
+x_test_sc = sc.transform(x_test)
+
+X_train_sc
+x_test_sc
+
+
+# %% model
+
+svm_reg = SVR(kernel='poly',gamma = 'default')
+svm_reg.fit(X_train_sc, y_train)
+
+
+# %% - validation
+
+
+scores = cross_val_score(svm_reg, X_train, y_train, cv=5)
+print("Mean cross-validataion score: %.2f" % scores.mean())
+
+
+kfold = KFold(n_splits=10, shuffle=True)
+kf_cv_scores = cross_val_score(svm_reg, X_train, y_train, cv=kfold)
+print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+
+
+# %% - predict
+
+
+y_pred = svm_reg.predict(x_test)
+mse = mean_squared_error(y_test, y_pred)
+print("MSE: %.2f" % mse)
+print("RMSE: %.2f" % np.sqrt(mse))
+
+# %% - plot predictions vs actual
+
+x_ax = range(len(y_test))
+plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
+plt.plot(x_ax, y_pred, lw=0.8, color="red", label="predicted")
+plt.legend()
+plt.show()
+
+
+# %%
+preds_actual_df = pd.DataFrame()
+preds_actual_df['Predicted'] = pd.Series(y_pred)
+preds_actual_df
+
+# %%
+# y_test
+pd.set_option("display.max_rows", None)
+preds_actual_df['Actual'] = y_test.values
+preds_actual_df

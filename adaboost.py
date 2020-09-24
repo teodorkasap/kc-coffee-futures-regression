@@ -258,6 +258,8 @@ mse = mean_squared_error(y_test,ypred)
 print("MSE: %.2f" % mse)
 print("RMSE: %.2f" % np.sqrt(mse))
 
+
+
 # %% - plot predictions vs actual
 
 x_ax = range(len(y_test))
@@ -298,3 +300,13 @@ plt.legend()
 plt.show()
 
 
+# %%
+preds_actual_df = pd.DataFrame()
+preds_actual_df['Predicted'] = pd.Series(ypred)
+preds_actual_df
+
+# %%
+# y_test
+pd.set_option("display.max_rows", None)
+preds_actual_df['Actual'] = y_test.values
+preds_actual_df
