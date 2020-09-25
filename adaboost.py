@@ -224,12 +224,12 @@ for column in columns_shift:
 
 # %% - get shape
 df = df.dropna()
-df
+df.columns
 
 # %% -corr. matrix
 
-corrMatrix = df.corr()
-print(corrMatrix)
+# corrMatrix = df.corr()
+# print(corrMatrix)
 
 # %% - eliminate low corellation features
 
@@ -245,7 +245,7 @@ df_test = df.iloc[cutoff:]
 
 df_train.shape
 
-X_train = df_train.drop(['KC_Close'], axis=1)
+X_train = df_train.drop(['KC_Close',"KC_Adj_Close"], axis=1)
 x_test = df_test.drop(['KC_Close'], axis=1)
 
 y_train = df_train['KC_Close']

@@ -184,14 +184,7 @@ df['USD_Williams_%R_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values
 df['USD_Williams_%R_7'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
                                     df['USD_Close'].values, timeperiod=7)
 
-df['USD_Slowk'], df['USD_Slowd'] = talib.STOCH(df['USD_High'].values,
-                                               df['USD_Low'].values,
-                                               df['USD_Close'].values,
-                                               fastk_period=5,
-                                               slowk_period=3,
-                                               slowk_matype=0,
-                                               slowd_period=3,
-                                               slowd_matype=0)
+
 
 add_SMA(df, 'USD_Close', 5, "USD")
 add_SMA(df, 'USD_Close', 10, "USD")
@@ -246,6 +239,7 @@ df
 # df_train.shape
 
 X_train = df.drop(['KC_Close'], axis=1)
+X_train.columns
 # x_test = df_test.drop(['KC_Close'], axis=1)
 
 y_train = df['KC_Close']
