@@ -246,7 +246,7 @@ df_test = df.iloc[cutoff:]
 df_train.shape
 
 X_train = df_train.drop(['KC_Close',"KC_Adj_Close"], axis=1)
-x_test = df_test.drop(['KC_Close'], axis=1)
+x_test = df_test.drop(['KC_Close',"KC_Adj_Close"], axis=1)
 
 y_train = df_train['KC_Close']
 y_test = df_test['KC_Close']
@@ -263,7 +263,7 @@ y_test = df_test['KC_Close']
 ada_reg = AdaBoostRegressor(n_estimators=100)
 ada_reg.fit(X_train, y_train)
 
-# %% - validation
+# %% - validation adaboost
 scores = cross_val_score(ada_reg, X_train, y_train, cv=5)
 print("Mean cross-validataion score: %.2f" % scores.mean())
 
@@ -276,9 +276,9 @@ print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 # %% - predictions
 
 adaboost_y_pred = ada_reg.predict(x_test)
-mse = mean_squared_error(y_test, ypred)
-print("MSE: %.2f" % mse)
-print("RMSE: %.2f" % np.sqrt(mse))
+mse_test = mean_squared_error(y_test, adaboost_y_pred)
+print("MSE: %.2f" % mse_test)
+print("RMSE: %.2f" % np.sqrt(mse_test))
 
 
 # %% - plot predictions vs actual
@@ -311,10 +311,9 @@ print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
 
 grad_boost_y_pred = grad_reg.predict(x_test)
-# mse_train = mean_squared_error(X_train,y_train)
-mse_test = mean_squared_error(y_test, ypred)
-print("MSE: %.2f" % mse)
-print("RMSE: %.2f" % np.sqrt(mse))
+mse_test = mean_squared_error(y_test, grad_boost_y_pred)
+print("MSE: %.2f" % mse_test)
+print("RMSE: %.2f" % np.sqrt(mse_test))
 
 # %% - plot predictions vs actual
 
@@ -356,7 +355,10 @@ print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 # %% - predict
 xgb_reg_y_pred = xgb_regressor.predict(x_test)
 # %%  - MSE
-mean_squared_error(y_test, xgb_reg_y_pred)
+mse_test = mean_squared_error(y_test, xgb_reg_y_pred)
+print("MSE: %.2f" % mse_test)
+print("RMSE: %.2f" % np.sqrt(mse_test))
+
 
 # %%
 
