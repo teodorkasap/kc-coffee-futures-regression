@@ -17,10 +17,9 @@ InteractiveShell.ast_node_interactivity = "all"
 
 # %% - methods
 
-def getUsdBrlData():
+def getUsdBrlData(filepath:str):
 
-    df = pd.read_csv(
-        'USD_BRL Historical Data(1).csv')
+    df = pd.read_csv(filepath)
     df['Date'] = pd.to_datetime(df['Date'], format='%b %d, %Y')
     df.columns
     columns = ['Date', 'USD_Close',	'USD_Open', 'USD_High', 'USD_Low', 'USD_Change %']
@@ -41,7 +40,7 @@ def add_EMA(dataframe, colum_name,  period,commodity):
 
 # %% - get data
 
-df = getUsdBrlData()
+df = getUsdBrlData(filepath)
 df = df.dropna()
 
 df['Date'] = pd.to_datetime(
