@@ -211,8 +211,8 @@ print(corrMatrix)
 
 # %% - eliminate low corellation features
 
-df = df[['KC_Close',"KC_Open", "KC_High", "KC_Low", "KC_SMA_10", "KC_SMA_20", "KC_EMA_10", "KC_EMA_20", "KC_EMA_50",
-         "USD_ATR_14", "USD_ATR_10", "USD_Williams_%R_14", "KC_RSI_14"]]
+# df = df[['KC_Close',"KC_Open", "KC_High", "KC_Low", "KC_SMA_10", "KC_SMA_20", "KC_EMA_10", "KC_EMA_20", "KC_EMA_50",
+#          "USD_ATR_14", "USD_ATR_10", "USD_Williams_%R_14", "KC_RSI_14"]]
 
 # %% - get train and test sets
 
@@ -324,12 +324,22 @@ regressor = xgboost.XGBRegressor(
     # max_depth=3,
     # subsample= 0.5,
     # tree_method = 'exact'
-    booster="gblinear",
-    
-
+    booster="gblinear"
 )
 
 regressor.fit(X_train, y_train, )
+
+
+
+
+# %% - validation
+scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
+print("Mean cross-validataion score: %.2f" % scores.mean())
+
+
+kfold = KFold(n_splits=10, shuffle=True)
+kf_cv_scores = cross_val_score(regressor, X_train, y_train, cv=kfold )
+print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
 
 # %% - predict
