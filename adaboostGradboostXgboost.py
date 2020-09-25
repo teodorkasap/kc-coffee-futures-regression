@@ -228,8 +228,8 @@ df
 
 # %% -corr. matrix
 
-corrMatrix = df.corr()
-print(corrMatrix)
+# corrMatrix = df.corr()
+# print(corrMatrix)
 
 # %% - eliminate low corellation features
 
@@ -238,25 +238,21 @@ print(corrMatrix)
 
 # %% - get train and test sets
 
-cutoff = int(round((df.shape[0])*0.8))
+# cutoff = int(round((df.shape[0])*0.8))
 
-df_train = df.iloc[:cutoff]
-df_test = df.iloc[cutoff:]
+# df_train = df.iloc[:cutoff]
+# df_test = df.iloc[cutoff:]
 
-df_train.shape
+# df_train.shape
 
-X_train = df_train.drop(['KC_Close'], axis=1)
-x_test = df_test.drop(['KC_Close'], axis=1)
+X_train = df.drop(['KC_Close'], axis=1)
+# x_test = df_test.drop(['KC_Close'], axis=1)
 
-y_train = df_train['KC_Close']
-y_test = df_test['KC_Close']
+y_train = df['KC_Close']
+# y_test = df_test['KC_Close']
 
 
 # %% - Normalize data
-
-# scaler = MinMaxScaler(feature_range=(0, 1))
-# X_train_scaled = scaler.fit_transform(X_train)
-# x_test_scaled = scaler.transform(x_test)
 
 # %% - build model -adaboost
 
@@ -268,27 +264,27 @@ scores = cross_val_score(ada_reg, X_train, y_train, cv=5)
 print("Mean cross-validataion score: %.2f" % scores.mean())
 
 
-kfold = KFold(n_splits=10, shuffle=True)
-kf_cv_scores = cross_val_score(ada_reg, X_train, y_train, cv=kfold)
-print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+# kfold = KFold(n_splits=10, shuffle=True)
+# kf_cv_scores = cross_val_score(ada_reg, X_train, y_train, cv=kfold)
+# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
 
 # %% - predictions
 
-adaboost_y_pred = ada_reg.predict(x_test)
-mse = mean_squared_error(y_test, ypred)
-print("MSE: %.2f" % mse)
-print("RMSE: %.2f" % np.sqrt(mse))
+# adaboost_y_pred = ada_reg.predict(x_test)
+# mse = mean_squared_error(y_test, ypred)
+# print("MSE: %.2f" % mse)
+# print("RMSE: %.2f" % np.sqrt(mse))
 
 
 # %% - plot predictions vs actual
 
-x_ax = range(len(y_test))
-x_ax = range(len(y_test))
-plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
-plt.plot(x_ax, adaboost_y_pred, lw=0.8, color="red", label="predicted (adaboost)")
-plt.legend()
-plt.show()
+# x_ax = range(len(y_test))
+# x_ax = range(len(y_test))
+# plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
+# plt.plot(x_ax, adaboost_y_pred, lw=0.8, color="red", label="predicted (adaboost)")
+# plt.legend()
+# plt.show()
 
 
 # %% - build model -grad. boost
@@ -298,31 +294,31 @@ grad_reg = GradientBoostingRegressor(
 grad_reg.fit(X_train, y_train)
 
 # %% - validation
-scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
-print("Mean cross-validataion score: %.2f" % scores.mean())
+# scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
+# print("Mean cross-validataion score: %.2f" % scores.mean())
 
 
-kfold = KFold(n_splits=10, shuffle=True)
-kf_cv_scores = cross_val_score(grad_reg, X_train, y_train, cv=kfold)
-print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+# kfold = KFold(n_splits=10, shuffle=True)
+# kf_cv_scores = cross_val_score(grad_reg, X_train, y_train, cv=kfold)
+# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
 
 # %% - predictions
 
 
-grad_boost_y_pred = grad_reg.predict(x_test)
+# grad_boost_y_pred = grad_reg.predict(x_test)
 # mse_train = mean_squared_error(X_train,y_train)
-mse_test = mean_squared_error(y_test, ypred)
-print("MSE: %.2f" % mse)
-print("RMSE: %.2f" % np.sqrt(mse))
+# mse_test = mean_squared_error(y_test, ypred)
+# print("MSE: %.2f" % mse)
+# print("RMSE: %.2f" % np.sqrt(mse))
 
 # %% - plot predictions vs actual
 
-x_ax = range(len(y_test))
-plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
-plt.plot(x_ax, grad_boost_y_pred, lw=0.8, color="red", label="predicted")
-plt.legend()
-plt.show()
+# x_ax = range(len(y_test))
+# plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
+# plt.plot(x_ax, grad_boost_y_pred, lw=0.8, color="red", label="predicted")
+# plt.legend()
+# plt.show()
 
 
 
@@ -344,49 +340,60 @@ xgb_regressor.fit(X_train, y_train)
 
 
 # %% - validation
-scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
-print("Mean cross-validataion score: %.2f" % scores.mean())
+# scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
+# print("Mean cross-validataion score: %.2f" % scores.mean())
 
 
-kfold = KFold(n_splits=10, shuffle=True)
-kf_cv_scores = cross_val_score(xgb_regressor, X_train, y_train, cv=kfold)
-print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+# kfold = KFold(n_splits=10, shuffle=True)
+# kf_cv_scores = cross_val_score(xgb_regressor, X_train, y_train, cv=kfold)
+# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
 
 # %% - predict
-xgb_reg_y_pred = xgb_regressor.predict(x_test)
+# xgb_reg_y_pred = xgb_regressor.predict(x_test)
 # %%  - MSE
-mean_squared_error(y_test, xgb_reg_y_pred)
+# mean_squared_error(y_test, xgb_reg_y_pred)
 
 # %%
 
 
-x_ax = range(len(y_test))
-x_ax = range(len(y_test))
-plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
-plt.plot(x_ax, xgb_reg_y_pred, lw=0.8, color="red", label="predicted (xgboost)")
-plt.legend()
-plt.show()
+# x_ax = range(len(y_test))
+# x_ax = range(len(y_test))
+# plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
+# plt.plot(x_ax, xgb_reg_y_pred, lw=0.8, color="red", label="predicted (xgboost)")
+# plt.legend()
+# plt.show()
 
 
 
 # %%
-preds_actual_df = pd.DataFrame()
-preds_actual_df['adaboost'] = pd.Series(adaboost_y_pred)
-preds_actual_df['grad boost'] = pd.Series(grad_boost_y_pred)
-preds_actual_df['xgboost'] = pd.Series(xgb_reg_y_pred)
-print("********")
-print("predictions for the past 5 days:")
-preds_actual_df.tail()
-print("********")
+# preds_actual_df = pd.DataFrame()
+# preds_actual_df['adaboost'] = pd.Series(adaboost_y_pred)
+# preds_actual_df['grad boost'] = pd.Series(grad_boost_y_pred)
+# preds_actual_df['xgboost'] = pd.Series(xgb_reg_y_pred)
+# print("********")
+# print("predictions for the past 5 days:")
+# preds_actual_df.tail()
+# print("********")
 
 
 # %% - plot predictions against preds_actual
 
-x_ax = range(len(y_test))
-plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
-plt.plot(x_ax, adaboost_y_pred, lw=0.8, color="red", label="predicted (adaboost)")
-plt.plot(x_ax, grad_boost_y_pred, lw=0.8, color="green", label="predicted (gboost)")
-plt.plot(x_ax, xgb_reg_y_pred, lw=0.8, color="purple", label="predicted (xgboost)")
-plt.legend()
-plt.show()
+# x_ax = range(len(y_test))
+# plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
+# plt.plot(x_ax, adaboost_y_pred, lw=0.8, color="red", label="predicted (adaboost)")
+# plt.plot(x_ax, grad_boost_y_pred, lw=0.8, color="green", label="predicted (gboost)")
+# plt.plot(x_ax, xgb_reg_y_pred, lw=0.8, color="purple", label="predicted (xgboost)")
+# plt.legend()
+# plt.show()
+
+# %% - save models
+import pickle
+
+file_ada = "final_ada_model.sav"
+file_grad = "final_grad_model.sav"
+file_xgb = "final_xgb_model.sav"
+
+pickle.dump(ada_reg, open(file_ada, 'wb'))
+pickle.dump(grad_reg, open(file_grad, 'wb'))
+pickle.dump(file_xgb, open(file_xgb, 'wb'))
