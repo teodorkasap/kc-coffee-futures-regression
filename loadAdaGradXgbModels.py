@@ -40,8 +40,8 @@ def getUsdBrlData(filepath: str):
 
 
 # %% - declare files
-file_usd = "USD_BRL Historical Data-25092020.csv"
-file_kc = 'KCK21.NYB-25092020.csv'
+file_usd = "USD_BRL Historical Data-29092020.csv"
+file_kc = 'KCK21.NYB-29092020.csv'
 
 
 # %% - method for preparing final df
@@ -127,8 +127,9 @@ df_kc = pd.read_csv(file_kc)
 
 
 df = prepareFinalKcData(df_kc, df_exch)
+df.columns
 # %%
-X_input = df.drop(['KC_Close','KC_Adj_Close'],axis=1)
+X_input = df.drop(['KC_Adj_Close'],axis=1)
 X_input =X_input.tail(20)
 
 # %% - get models

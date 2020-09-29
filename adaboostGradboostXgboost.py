@@ -241,7 +241,7 @@ df
 
 # df_train.shape
 
-X_train = df.drop(['KC_Adj_Close'], axis=1)
+X_train = df.drop(['target','KC_Adj_Close'], axis=1)
 X_train.columns
 # x_test = df_test.drop(['KC_Close'], axis=1)
 

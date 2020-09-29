@@ -251,8 +251,8 @@ df_test = df.iloc[cutoff:]
 
 df_train.shape
 
-X_train = df_train.drop(["KC_Adj_Close"], axis=1)
-x_test = df_test.drop(["KC_Adj_Close"], axis=1)
+X_train = df_train.drop(['target',"KC_Adj_Close"], axis=1)
+x_test = df_test.drop(['target',"KC_Adj_Close"], axis=1)
 
 y_train = df_train['target']
 y_test = df_test['target']
