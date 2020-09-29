@@ -131,6 +131,6 @@ dmypy.json
 # Text files
 *.txt
 .vscode/settings.json
-*.xls
+
 *.zip
-*.csv
+
