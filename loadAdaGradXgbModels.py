@@ -56,89 +56,65 @@ def prepareFinalKcData(df_kc, df_exch):
     df = pd.merge(left=df, right=df_exch, left_on='Date', right_on='Date')
     df = df.set_index('Date')
 
-    # add SMA columns
     add_SMA(df, 'KC_Close', 10, "KC")
     add_SMA(df, 'KC_Close', 20, "KC")
     add_SMA(df, 'KC_Close', 50, "KC")
     add_SMA(df, 'KC_Close', 100, "KC")
     add_SMA(df, 'KC_Close', 200, "KC")
-    add_SMA(df, 'USD_Close', 5, "USD")
-    add_SMA(df, 'USD_Close', 10, "USD")
-    add_SMA(df, 'USD_Close', 25, "USD")
-    add_SMA(df, 'USD_Close', 50, "USD")
-    add_SMA(df, 'USD_Close', 100, "USD")
-
-    # add EMA columns
     add_EMA(df, 'KC_Close', 10, "KC")
     add_EMA(df, 'KC_Close', 20, "KC")
     add_EMA(df, 'KC_Close', 50, "KC")
     add_EMA(df, 'KC_Close', 100, "KC")
     add_EMA(df, 'KC_Close', 200, "KC")
+    add_SMA(df, 'USD_Close', 5, "USD")
+    add_SMA(df, 'USD_Close', 10, "USD")
+    add_SMA(df, 'USD_Close', 25, "USD")
+    add_SMA(df, 'USD_Close', 50, "USD")
+    add_SMA(df, 'USD_Close', 100, "USD")
     add_EMA(df, 'USD_Close', 5, "USD")
     add_EMA(df, 'USD_Close', 10, "USD")
     add_EMA(df, 'USD_Close', 25, "USD")
     add_EMA(df, 'USD_Close', 50, "USD")
     add_EMA(df, 'USD_Close', 100, "USD")
 
-    # add ATR columns
     df['KC_ATR_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
-                                df['KC_Close'].values, timeperiod=14)
-    df['USD_ATR_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
-                                 df['USD_Close'].values, timeperiod=14)
-    df['USD_ATR_10'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
-                                 df['USD_Close'].values, timeperiod=10)
-
-    # add ROC columns
-    df['KC_ROC_10'] = talib.ROC(df['KC_Close'], timeperiod=10)
-    df['USD_ROC_10'] = talib.ROC(df['USD_Close'], timeperiod=10)
-    df['USD_ROC_5'] = talib.ROC(df['USD_Close'], timeperiod=5)
-
-    # add slowd slowk
-    df['KC_Slowd'] = talib.STOCH(df['KC_High'].values,
-                                 df['KC_Low'].values,
-                                 df['KC_Close'].values,
-                                 fastk_period=5,
-                                 slowk_period=3,
-                                 slowk_matype=0,
-                                 slowd_period=3,
-                                 slowd_matype=0)[1]
-    df['USD_Slowk'], df['USD_Slowd'] = talib.STOCH(df['USD_High'].values,
-                                                   df['USD_Low'].values,
-                                                   df['USD_Close'].values,
-                                                   fastk_period=5,
-                                                   slowk_period=3,
-                                                   slowk_matype=0,
-                                                   slowd_period=3,
-                                                   slowd_matype=0)
-
-    # add ADX columns
+                            df['KC_Close'].values, timeperiod=14)
     df['KC_ADX_14'] = talib.ADX(df['KC_High'].values, df['KC_Low'].values,
                                 df['KC_Close'].values, timeperiod=14)
-    df['USD_ADX_14'] = talib.ADX(df['USD_High'].values, df['USD_Low'].values,
-                                 df['USD_Close'].values, timeperiod=14)
-    df['USD_ADX_10'] = talib.ADX(df['USD_High'].values, df['USD_Low'].values,
-                                 df['USD_Close'].values, timeperiod=10)
-
-    # add CCI columns
     df['KC_CCI_14'] = talib.CCI(df['KC_High'].values, df['KC_Low'].values,
                                 df['KC_Close'].values, timeperiod=14)
-    df['USD_CCI_14'] = talib.CCI(df['USD_High'].values, df['USD_Low'].values,
-                                 df['USD_Close'].values, timeperiod=14)
-    df['USD_CCI_10'] = talib.CCI(df['USD_High'].values, df['USD_Low'].values,
-                                 df['USD_Close'].values, timeperiod=10)
-
-    # add RSI columns
+    df['KC_ROC_10'] = talib.ROC(df['KC_Close'], timeperiod=10)
     df['KC_RSI_14'] = talib.RSI(df['KC_Close'], timeperiod=14)
-    df['USD_RSI_14'] = talib.RSI(df['USD_Close'], timeperiod=14)
-    df['USD_RSI_7'] = talib.RSI(df['USD_Close'], timeperiod=7)
-
-    # add williams %r
     df['KC_Williams_%R_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
                                         df['KC_Close'].values, timeperiod=14)
+    df['KC_Slowd'] = talib.STOCH(df['KC_High'].values,
+                                df['KC_Low'].values,
+                                df['KC_Close'].values,
+                                fastk_period=5,
+                                slowk_period=3,
+                                slowk_matype=0,
+                                slowd_period=3,
+                                slowd_matype=0)[1]
+    df['USD_ATR_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
+                                df['USD_Close'].values, timeperiod=14)
+    df['USD_ATR_10'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
+                                df['USD_Close'].values, timeperiod=10)
+    df['USD_ADX_14'] = talib.ADX(df['USD_High'].values, df['USD_Low'].values,
+                                df['USD_Close'].values, timeperiod=14)
+    df['USD_ADX_10'] = talib.ADX(df['USD_High'].values, df['USD_Low'].values,
+                                df['USD_Close'].values, timeperiod=10)
+    df['USD_CCI_14'] = talib.CCI(df['USD_High'].values, df['USD_Low'].values,
+                                df['USD_Close'].values, timeperiod=14)
+    df['USD_CCI_10'] = talib.CCI(df['USD_High'].values, df['USD_Low'].values,
+                                df['USD_Close'].values, timeperiod=10)
+    df['USD_ROC_10'] = talib.ROC(df['USD_Close'], timeperiod=10)
+    df['USD_ROC_5'] = talib.ROC(df['USD_Close'], timeperiod=5)
+    df['USD_RSI_14'] = talib.RSI(df['USD_Close'], timeperiod=14)
+    df['USD_RSI_7'] = talib.RSI(df['USD_Close'], timeperiod=7)
     df['USD_Williams_%R_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
-                                     df['USD_Close'].values, timeperiod=14)
+                                        df['USD_Close'].values, timeperiod=14)
     df['USD_Williams_%R_7'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
-                                    df['USD_Close'].values, timeperiod=7)
+                                        df['USD_Close'].values, timeperiod=7)
 
     df = df.dropna()
     return df
@@ -166,3 +142,6 @@ xgb_reg = pickle.load(open(file_xgb, 'rb'))
 
 # %% - predictions
 ada_predictions = ada_reg.predict(X_input)
+
+# %%
+ada_predictions

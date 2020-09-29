@@ -3,6 +3,7 @@
 
 # %% - imports
 
+from operator import add
 import time
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -215,7 +216,9 @@ df.columns
 
 # %% shift kc related columns
 
-columns_shift = ['KC_Open', 'KC_High', 'KC_Low', 'KC_SMA_10',
+df['target'] = df['KC_Close']
+
+columns_shift = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'KC_SMA_10',
                  'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
                  'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14',
                  'KC_CCI_14', 'KC_Slowd', 'KC_ROC_10', 'KC_RSI_14', 'KC_Williams_%R_14', ]
@@ -225,6 +228,9 @@ for column in columns_shift:
 # %% - get shape
 df = df.dropna()
 df.columns
+
+# %% - 
+df
 
 # %% -corr. matrix
 
@@ -245,11 +251,11 @@ df_test = df.iloc[cutoff:]
 
 df_train.shape
 
-X_train = df_train.drop(['KC_Close',"KC_Adj_Close"], axis=1)
-x_test = df_test.drop(['KC_Close',"KC_Adj_Close"], axis=1)
+X_train = df_train.drop(["KC_Adj_Close"], axis=1)
+x_test = df_test.drop(["KC_Adj_Close"], axis=1)
 
-y_train = df_train['KC_Close']
-y_test = df_test['KC_Close']
+y_train = df_train['target']
+y_test = df_test['target']
 
 
 # %% - Normalize data

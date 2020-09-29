@@ -3,6 +3,7 @@
 
 # %% - imports
 
+import pickle
 import time
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -185,7 +186,6 @@ df['USD_Williams_%R_7'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
                                     df['USD_Close'].values, timeperiod=7)
 
 
-
 add_SMA(df, 'USD_Close', 5, "USD")
 add_SMA(df, 'USD_Close', 10, "USD")
 add_SMA(df, 'USD_Close', 25, "USD")
@@ -208,7 +208,10 @@ df.columns
 
 # %% shift kc related columns
 
-columns_shift = ['KC_Open', 'KC_High', 'KC_Low', 'KC_SMA_10',
+df['target'] = df['KC_Close']
+
+
+columns_shift = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'KC_SMA_10',
                  'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
                  'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14',
                  'KC_CCI_14', 'KC_Slowd', 'KC_ROC_10', 'KC_RSI_14', 'KC_Williams_%R_14', ]
@@ -238,11 +241,11 @@ df
 
 # df_train.shape
 
-X_train = df.drop(['KC_Close','KC_Adj_Close'], axis=1)
+X_train = df.drop(['KC_Adj_Close'], axis=1)
 X_train.columns
 # x_test = df_test.drop(['KC_Close'], axis=1)
 
-y_train = df['KC_Close']
+y_train = df['target']
 # y_test = df_test['KC_Close']
 
 
@@ -315,9 +318,6 @@ grad_reg.fit(X_train, y_train)
 # plt.show()
 
 
-
-
-
 # %% - xgboost model
 
 xgb_regressor = xgboost.XGBRegressor(
@@ -325,8 +325,8 @@ xgb_regressor = xgboost.XGBRegressor(
     reg_lambda=1,
     gamma=0.5,
     max_depth=3,
-    subsample= 0.5,
-    tree_method = 'exact'
+    subsample=0.5,
+    tree_method='exact'
     # booster="gblinear"
 )
 
@@ -359,7 +359,6 @@ xgb_regressor.fit(X_train, y_train)
 # plt.show()
 
 
-
 # %%
 # preds_actual_df = pd.DataFrame()
 # preds_actual_df['adaboost'] = pd.Series(adaboost_y_pred)
@@ -382,7 +381,6 @@ xgb_regressor.fit(X_train, y_train)
 # plt.show()
 
 # %% - save models
-import pickle
 
 file_ada = "final_ada_model.sav"
 file_grad = "final_grad_model.sav"
