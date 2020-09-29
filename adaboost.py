@@ -37,6 +37,19 @@ def getUsdBrlData(filepath: str):
     return df
 
 
+def getOilPriceData(filepath: str):
+
+    df = pd.read_csv(filepath)
+    df = df.dropna()
+    columns = ["Date", "CL_Open", "CL_High", "CL_Low",
+           "CL_Close", "CL_Adj_Close", "CL_Volume"]
+    df.columns = columns
+    df = df.drop(['CL_Volume'], axis=1)
+    df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+
+
+
+
 # %% - predict usd prices
 file_usd = "USD_BRL Historical Data-25092020.csv"
 
@@ -229,7 +242,7 @@ for column in columns_shift:
 df = df.dropna()
 df.columns
 
-# %% - 
+# %% -
 df
 
 # %% -corr. matrix
@@ -251,8 +264,8 @@ df_test = df.iloc[cutoff:]
 
 df_train.shape
 
-X_train = df_train.drop(['target',"KC_Adj_Close"], axis=1)
-x_test = df_test.drop(['target',"KC_Adj_Close"], axis=1)
+X_train = df_train.drop(['target', "KC_Adj_Close"], axis=1)
+x_test = df_test.drop(['target', "KC_Adj_Close"], axis=1)
 
 y_train = df_train['target']
 y_test = df_test['target']
@@ -292,7 +305,8 @@ print("RMSE: %.2f" % np.sqrt(mse_test))
 x_ax = range(len(y_test))
 x_ax = range(len(y_test))
 plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
-plt.plot(x_ax, adaboost_y_pred, lw=0.8, color="red", label="predicted (adaboost)")
+plt.plot(x_ax, adaboost_y_pred, lw=0.8,
+         color="red", label="predicted (adaboost)")
 plt.legend()
 plt.show()
 
@@ -330,9 +344,6 @@ plt.legend()
 plt.show()
 
 
-
-
-
 # %% - xgboost model
 
 xgb_regressor = xgboost.XGBRegressor(
@@ -340,8 +351,8 @@ xgb_regressor = xgboost.XGBRegressor(
     reg_lambda=1,
     gamma=0.5,
     max_depth=3,
-    subsample= 0.5,
-    tree_method = 'exact'
+    subsample=0.5,
+    tree_method='exact'
     # booster="gblinear"
 )
 
@@ -372,10 +383,10 @@ print("RMSE: %.2f" % np.sqrt(mse_test))
 x_ax = range(len(y_test))
 x_ax = range(len(y_test))
 plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
-plt.plot(x_ax, xgb_reg_y_pred, lw=0.8, color="red", label="predicted (xgboost)")
+plt.plot(x_ax, xgb_reg_y_pred, lw=0.8,
+         color="red", label="predicted (xgboost)")
 plt.legend()
 plt.show()
-
 
 
 # %%
@@ -393,8 +404,11 @@ print("********")
 
 x_ax = range(len(y_test))
 plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
-plt.plot(x_ax, adaboost_y_pred, lw=0.8, color="red", label="predicted (adaboost)")
-plt.plot(x_ax, grad_boost_y_pred, lw=0.8, color="green", label="predicted (gboost)")
-plt.plot(x_ax, xgb_reg_y_pred, lw=0.8, color="purple", label="predicted (xgboost)")
+plt.plot(x_ax, adaboost_y_pred, lw=0.8,
+         color="red", label="predicted (adaboost)")
+plt.plot(x_ax, grad_boost_y_pred, lw=0.8,
+         color="green", label="predicted (gboost)")
+plt.plot(x_ax, xgb_reg_y_pred, lw=0.8,
+         color="purple", label="predicted (xgboost)")
 plt.legend()
 plt.show()
