@@ -42,16 +42,16 @@ def getOilPriceData(filepath: str):
     df = pd.read_csv(filepath)
     df = df.dropna()
     columns = ["Date", "CL_Open", "CL_High", "CL_Low",
-           "CL_Close", "CL_Adj_Close", "CL_Volume"]
+               "CL_Close", "CL_Adj_Close", "CL_Volume"]
     df.columns = columns
     df = df.drop(['CL_Volume'], axis=1)
     df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+    return df
 
 
-
-
-# %% - predict usd prices
+# %% - data files
 file_usd = "USD_BRL Historical Data-25092020.csv"
+file_oil = "CLK21.NYM.csv"
 
 # %% - get usd / brl data
 df_exch = getUsdBrlData(file_usd)
@@ -63,6 +63,20 @@ for column in columns_shift:
     df_exch[column] = df_exch[column].shift(-1)
 
 df_exch
+
+# %% - get oil contract prices
+df_oil = getOilPriceData(file_oil)
+columns_shift = ["CL_Open", "CL_High", "CL_Low",
+                 "CL_Close", "CL_Adj_Close", "CL_Volume"]
+for column in columns_shift:
+    try:
+        df_oil[column] = df_oil[column].shift(1)
+    except KeyError as err:
+        print("not found: ", column)
+
+df_oil = df_oil.dropna()
+df_oil
+
 
 # %% - get KC data
 df = pd.read_csv(
@@ -91,6 +105,8 @@ df['Date'] = pd.to_datetime(
 
 # %% - merge two dataframes on KC data dates
 df = pd.merge(left=df, right=df_exch, left_on='Date', right_on='Date')
+df = pd.merge(left=df, right=df_oil, left_on='Date', right_on='Date')
+
 
 
 # %%- get exch rate prediction
@@ -113,6 +129,20 @@ plt.title('USD/BRL closing prices')
 plt.ylabel('BRL')
 plt.show()
 
+df['CL_Close'].plot(grid=True)
+plt.title('OIL/USD closing prices')
+plt.ylabel('OIL')
+plt.show()
+
+
+# %% - plot on same graph
+
+df['KC_Close'].plot(grid=True)
+df['CL_Close'].plot(grid=True)
+plt.show()
+
+
+
 
 # %% - calculate Simple Moving Averages
 def add_SMA(dataframe, colum_name,  period, commodity):
@@ -126,6 +156,11 @@ add_SMA(df, 'KC_Close', 50, "KC")
 add_SMA(df, 'KC_Close', 100, "KC")
 add_SMA(df, 'KC_Close', 200, "KC")
 
+add_SMA(df, 'CL_Close', 10, "CL")
+add_SMA(df, 'CL_Close', 20, "CL")
+add_SMA(df, 'CL_Close', 50, "CL")
+add_SMA(df, 'CL_Close', 100, "CL")
+add_SMA(df, 'CL_Close', 200, "CL")
 
 # %% - calculate Exponential Moving Averages
 
@@ -140,6 +175,12 @@ add_EMA(df, 'KC_Close', 20, "KC")
 add_EMA(df, 'KC_Close', 50, "KC")
 add_EMA(df, 'KC_Close', 100, "KC")
 add_EMA(df, 'KC_Close', 200, "KC")
+
+add_EMA(df, 'CL_Close', 10, "CL")
+add_EMA(df, 'CL_Close', 20, "CL")
+add_EMA(df, 'CL_Close', 50, "CL")
+add_EMA(df, 'CL_Close', 100, "CL")
+add_EMA(df, 'CL_Close', 200, "CL")
 
 
 # %% - calculate Average True Range
@@ -168,6 +209,35 @@ df['KC_Slowd'] = talib.STOCH(df['KC_High'].values,
                              slowk_matype=0,
                              slowd_period=3,
                              slowd_matype=0)[1]
+
+df['CL_ATR_14'] = talib.ATR(df['CL_High'].values, df['CL_Low'].values,
+                            df['CL_Close'].values, timeperiod=14)
+
+df['CL_ADX_14'] = talib.ADX(df['CL_High'].values, df['CL_Low'].values,
+                            df['CL_Close'].values, timeperiod=14)
+
+df['CL_CCI_14'] = talib.CCI(df['CL_High'].values, df['CL_Low'].values,
+                            df['CL_Close'].values, timeperiod=14)
+
+df['CL_ROC_10'] = talib.ROC(df['CL_Close'], timeperiod=10)
+
+df['CL_RSI_14'] = talib.RSI(df['CL_Close'], timeperiod=14)
+
+df['CL_Williams_%R_14'] = talib.ATR(df['CL_High'].values, df['CL_Low'].values,
+                                    df['CL_Close'].values, timeperiod=14)
+
+df['CL_Slowd'] = talib.STOCH(df['CL_High'].values,
+                             df['CL_Low'].values,
+                             df['CL_Close'].values,
+                             fastk_period=5,
+                             slowk_period=3,
+                             slowk_matype=0,
+                             slowd_period=3,
+                             slowd_matype=0)[1]
+
+
+
+
 
 df['USD_ATR_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
                              df['USD_Close'].values, timeperiod=14)
