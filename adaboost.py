@@ -44,14 +44,42 @@ def getOilPriceData(filepath: str):
     columns = ["Date", "CL_Open", "CL_High", "CL_Low",
                "CL_Close", "CL_Adj_Close", "CL_Volume"]
     df.columns = columns
-    df = df.drop(['CL_Volume'], axis=1)
+    df = df.drop(['CL_Volume',"CL_Adj_Close"], axis=1)
     df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
     return df
+
+
+def getSugarPriceData(filepath: str):
+
+    df = pd.read_csv(filepath)
+    df = df.dropna()
+    columns = ["Date", "SB_Open", "SB_High", "SB_Low",
+               "SB_Close", "SB_Adj_Close", "SB_Volume"]
+    df.columns = columns
+    df = df.drop(['SB_Volume',"SB_Adj_Close"], axis=1)
+    df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+    return df
+
+def getCornPriceData(filepath: str):
+
+    df = pd.read_csv(filepath)
+    df = df.dropna()
+    columns = ["Date", "ZK_Open", "ZK_High", "ZK_Low",
+               "ZK_Close", "ZK_Adj_Close", "ZK_Volume"]
+    df.columns = columns
+    df = df.drop(['ZK_Volume',"ZK_Adj_Close"], axis=1)
+    df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+    return df
+
+
 
 
 # %% - data files
 file_usd = "USD_BRL Historical Data-25092020.csv"
 file_oil = "CLK21.NYM.csv"
+file_sugar = "SBK21.NYB(1).csv"
+file_corn = "ZCK21.CBT(1).csv"
+
 
 # %% - get usd / brl data
 df_exch = getUsdBrlData(file_usd)
@@ -77,6 +105,32 @@ for column in columns_shift:
 df_oil = df_oil.dropna()
 df_oil
 
+# %% - get sugar futures prices
+df_sugar = getSugarPriceData(file_sugar)
+columns_shift = ["SB_Open", "SB_High", "SB_Low",
+                 "SB_Close", "SB_Adj_Close", "SB_Volume"]
+for column in columns_shift:
+    try:
+        df_sugar[column] = df_sugar[column].shift(1)
+    except KeyError as err:
+        print("not found: ", column)
+
+df_sugar = df_sugar.dropna()
+df_sugar
+
+
+# %% - get corn futures prices
+df_corn = getSugarPriceData(file_corn)
+columns_shift = ["SB_Open", "SB_High", "SB_Low",
+                 "SB_Close", "SB_Adj_Close", "SB_Volume"]
+for column in columns_shift:
+    try:
+        df_corn[column] = df_corn[column].shift(1)
+    except KeyError as err:
+        print("not found: ", column)
+
+df_corn = df_corn.dropna()
+df_corn
 
 # %% - get KC data
 df = pd.read_csv(
@@ -106,6 +160,8 @@ df['Date'] = pd.to_datetime(
 # %% - merge two dataframes on KC data dates
 df = pd.merge(left=df, right=df_exch, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_oil, left_on='Date', right_on='Date')
+df = pd.merge(left=df, right=df_sugar, left_on='Date', right_on='Date')
+
 
 
 
@@ -162,6 +218,12 @@ add_SMA(df, 'CL_Close', 50, "CL")
 add_SMA(df, 'CL_Close', 100, "CL")
 add_SMA(df, 'CL_Close', 200, "CL")
 
+add_SMA(df, 'SB_Close', 10, "SB")
+add_SMA(df, 'SB_Close', 20, "SB")
+add_SMA(df, 'SB_Close', 50, "SB")
+add_SMA(df, 'SB_Close', 100, "SB")
+add_SMA(df, 'SB_Close', 200, "SB")
+
 # %% - calculate Exponential Moving Averages
 
 
@@ -181,6 +243,12 @@ add_EMA(df, 'CL_Close', 20, "CL")
 add_EMA(df, 'CL_Close', 50, "CL")
 add_EMA(df, 'CL_Close', 100, "CL")
 add_EMA(df, 'CL_Close', 200, "CL")
+
+add_EMA(df, 'SB_Close', 10, "SB")
+add_EMA(df, 'SB_Close', 20, "SB")
+add_EMA(df, 'SB_Close', 50, "SB")
+add_EMA(df, 'SB_Close', 100, "SB")
+add_EMA(df, 'SB_Close', 200, "SB")
 
 
 # %% - calculate Average True Range
@@ -235,6 +303,31 @@ df['CL_Slowd'] = talib.STOCH(df['CL_High'].values,
                              slowd_period=3,
                              slowd_matype=0)[1]
 
+
+df['SB_ATR_14'] = talib.ATR(df['SB_High'].values, df['SB_Low'].values,
+                            df['SB_Close'].values, timeperiod=14)
+
+df['SB_ADX_14'] = talib.ADX(df['SB_High'].values, df['SB_Low'].values,
+                            df['SB_Close'].values, timeperiod=14)
+
+df['SB_CCI_14'] = talib.CCI(df['SB_High'].values, df['SB_Low'].values,
+                            df['SB_Close'].values, timeperiod=14)
+
+df['SB_ROC_10'] = talib.ROC(df['SB_Close'], timeperiod=10)
+
+df['SB_RSI_14'] = talib.RSI(df['SB_Close'], timeperiod=14)
+
+df['SB_Williams_%R_14'] = talib.ATR(df['SB_High'].values, df['SB_Low'].values,
+                                    df['SB_Close'].values, timeperiod=14)
+
+df['SB_Slowd'] = talib.STOCH(df['SB_High'].values,
+                             df['SB_Low'].values,
+                             df['SB_Close'].values,
+                             fastk_period=5,
+                             slowk_period=3,
+                             slowk_matype=0,
+                             slowd_period=3,
+                             slowd_matype=0)[1]
 
 
 
