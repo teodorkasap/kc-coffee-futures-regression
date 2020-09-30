@@ -64,10 +64,10 @@ def getCornPriceData(filepath: str):
 
     df = pd.read_csv(filepath)
     df = df.dropna()
-    columns = ["Date", "ZK_Open", "ZK_High", "ZK_Low",
-               "ZK_Close", "ZK_Adj_Close", "ZK_Volume"]
+    columns = ["Date", "ZC_Open", "ZC_High", "ZC_Low",
+               "ZC_Close", "ZC_Adj_Close", "ZC_Volume"]
     df.columns = columns
-    df = df.drop(['ZK_Volume',"ZK_Adj_Close"], axis=1)
+    df = df.drop(['ZC_Volume',"ZC_Adj_Close"], axis=1)
     df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
     return df
 
@@ -120,9 +120,9 @@ df_sugar
 
 
 # %% - get corn futures prices
-df_corn = getSugarPriceData(file_corn)
-columns_shift = ["SB_Open", "SB_High", "SB_Low",
-                 "SB_Close", "SB_Adj_Close", "SB_Volume"]
+df_corn = getCornPriceData(file_corn)
+columns_shift = ["ZC_Open", "ZC_High", "ZC_Low",
+                 "ZC_Close", "ZC_Adj_Close", "ZC_Volume"]
 for column in columns_shift:
     try:
         df_corn[column] = df_corn[column].shift(1)
@@ -161,6 +161,7 @@ df['Date'] = pd.to_datetime(
 df = pd.merge(left=df, right=df_exch, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_oil, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_sugar, left_on='Date', right_on='Date')
+# df = pd.merge(left=df, right=df_corn, left_on='Date', right_on='Date')
 
 
 
@@ -224,6 +225,12 @@ add_SMA(df, 'SB_Close', 50, "SB")
 add_SMA(df, 'SB_Close', 100, "SB")
 add_SMA(df, 'SB_Close', 200, "SB")
 
+# add_SMA(df, 'ZC_Close', 10, "ZC")
+# add_SMA(df, 'ZC_Close', 20, "ZC")
+# add_SMA(df, 'ZC_Close', 50, "ZC")
+# add_SMA(df, 'ZC_Close', 100, "ZC")
+# add_SMA(df, 'ZC_Close', 200, "ZC")
+
 # %% - calculate Exponential Moving Averages
 
 
@@ -250,25 +257,25 @@ add_EMA(df, 'SB_Close', 50, "SB")
 add_EMA(df, 'SB_Close', 100, "SB")
 add_EMA(df, 'SB_Close', 200, "SB")
 
+# add_EMA(df, 'ZC_Close', 10, "ZC")
+# add_EMA(df, 'ZC_Close', 20, "ZC")
+# add_EMA(df, 'ZC_Close', 50, "ZC")
+# add_EMA(df, 'ZC_Close', 100, "ZC")
+# add_EMA(df, 'ZC_Close', 200, "ZC")
+
 
 # %% - calculate Average True Range
 
 df['KC_ATR_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
                             df['KC_Close'].values, timeperiod=14)
-
 df['KC_ADX_14'] = talib.ADX(df['KC_High'].values, df['KC_Low'].values,
                             df['KC_Close'].values, timeperiod=14)
-
 df['KC_CCI_14'] = talib.CCI(df['KC_High'].values, df['KC_Low'].values,
                             df['KC_Close'].values, timeperiod=14)
-
 df['KC_ROC_10'] = talib.ROC(df['KC_Close'], timeperiod=10)
-
 df['KC_RSI_14'] = talib.RSI(df['KC_Close'], timeperiod=14)
-
 df['KC_Williams_%R_14'] = talib.ATR(df['KC_High'].values, df['KC_Low'].values,
                                     df['KC_Close'].values, timeperiod=14)
-
 df['KC_Slowd'] = talib.STOCH(df['KC_High'].values,
                              df['KC_Low'].values,
                              df['KC_Close'].values,
@@ -280,20 +287,14 @@ df['KC_Slowd'] = talib.STOCH(df['KC_High'].values,
 
 df['CL_ATR_14'] = talib.ATR(df['CL_High'].values, df['CL_Low'].values,
                             df['CL_Close'].values, timeperiod=14)
-
 df['CL_ADX_14'] = talib.ADX(df['CL_High'].values, df['CL_Low'].values,
                             df['CL_Close'].values, timeperiod=14)
-
 df['CL_CCI_14'] = talib.CCI(df['CL_High'].values, df['CL_Low'].values,
                             df['CL_Close'].values, timeperiod=14)
-
 df['CL_ROC_10'] = talib.ROC(df['CL_Close'], timeperiod=10)
-
 df['CL_RSI_14'] = talib.RSI(df['CL_Close'], timeperiod=14)
-
 df['CL_Williams_%R_14'] = talib.ATR(df['CL_High'].values, df['CL_Low'].values,
                                     df['CL_Close'].values, timeperiod=14)
-
 df['CL_Slowd'] = talib.STOCH(df['CL_High'].values,
                              df['CL_Low'].values,
                              df['CL_Close'].values,
@@ -306,20 +307,14 @@ df['CL_Slowd'] = talib.STOCH(df['CL_High'].values,
 
 df['SB_ATR_14'] = talib.ATR(df['SB_High'].values, df['SB_Low'].values,
                             df['SB_Close'].values, timeperiod=14)
-
 df['SB_ADX_14'] = talib.ADX(df['SB_High'].values, df['SB_Low'].values,
                             df['SB_Close'].values, timeperiod=14)
-
 df['SB_CCI_14'] = talib.CCI(df['SB_High'].values, df['SB_Low'].values,
                             df['SB_Close'].values, timeperiod=14)
-
 df['SB_ROC_10'] = talib.ROC(df['SB_Close'], timeperiod=10)
-
 df['SB_RSI_14'] = talib.RSI(df['SB_Close'], timeperiod=14)
-
 df['SB_Williams_%R_14'] = talib.ATR(df['SB_High'].values, df['SB_Low'].values,
                                     df['SB_Close'].values, timeperiod=14)
-
 df['SB_Slowd'] = talib.STOCH(df['SB_High'].values,
                              df['SB_Low'].values,
                              df['SB_Close'].values,
@@ -328,6 +323,25 @@ df['SB_Slowd'] = talib.STOCH(df['SB_High'].values,
                              slowk_matype=0,
                              slowd_period=3,
                              slowd_matype=0)[1]
+
+# df['ZC_ATR_14'] = talib.ATR(df['ZC_High'].values, df['ZC_Low'].values,
+#                             df['ZC_Close'].values, timeperiod=14)
+# df['ZC_ADX_14'] = talib.ADX(df['ZC_High'].values, df['ZC_Low'].values,
+#                             df['ZC_Close'].values, timeperiod=14)
+# df['ZC_CCI_14'] = talib.CCI(df['ZC_High'].values, df['ZC_Low'].values,
+#                             df['ZC_Close'].values, timeperiod=14)
+# df['ZC_ROC_10'] = talib.ROC(df['ZC_Close'], timeperiod=10)
+# df['ZC_RSI_14'] = talib.RSI(df['ZC_Close'], timeperiod=14)
+# df['ZC_Williams_%R_14'] = talib.ATR(df['ZC_High'].values, df['ZC_Low'].values,
+#                                     df['ZC_Close'].values, timeperiod=14)
+# df['ZC_Slowd'] = talib.STOCH(df['ZC_High'].values,
+#                              df['ZC_Low'].values,
+#                              df['ZC_Close'].values,
+#                              fastk_period=5,
+#                              slowk_period=3,
+#                              slowk_matype=0,
+#                              slowd_period=3,
+#                              slowd_matype=0)[1]
 
 
 
