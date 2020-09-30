@@ -242,20 +242,20 @@ def add_EMA(dataframe, colum_name,  period, commodity):
 add_EMA(df, 'KC_Close', 10, "KC")
 add_EMA(df, 'KC_Close', 20, "KC")
 add_EMA(df, 'KC_Close', 50, "KC")
-add_EMA(df, 'KC_Close', 100, "KC")
-add_EMA(df, 'KC_Close', 200, "KC")
+# add_EMA(df, 'KC_Close', 100, "KC")
+# add_EMA(df, 'KC_Close', 200, "KC")
 
 add_EMA(df, 'CL_Close', 10, "CL")
 add_EMA(df, 'CL_Close', 20, "CL")
 add_EMA(df, 'CL_Close', 50, "CL")
-add_EMA(df, 'CL_Close', 100, "CL")
-add_EMA(df, 'CL_Close', 200, "CL")
+# add_EMA(df, 'CL_Close', 100, "CL")
+# add_EMA(df, 'CL_Close', 200, "CL")
 
 add_EMA(df, 'SB_Close', 10, "SB")
 add_EMA(df, 'SB_Close', 20, "SB")
 add_EMA(df, 'SB_Close', 50, "SB")
-add_EMA(df, 'SB_Close', 100, "SB")
-add_EMA(df, 'SB_Close', 200, "SB")
+# add_EMA(df, 'SB_Close', 100, "SB")
+# add_EMA(df, 'SB_Close', 200, "SB")
 
 # add_EMA(df, 'ZC_Close', 10, "ZC")
 # add_EMA(df, 'ZC_Close', 20, "ZC")
@@ -388,13 +388,13 @@ add_SMA(df, 'USD_Close', 5, "USD")
 add_SMA(df, 'USD_Close', 10, "USD")
 add_SMA(df, 'USD_Close', 25, "USD")
 add_SMA(df, 'USD_Close', 50, "USD")
-add_SMA(df, 'USD_Close', 100, "USD")
+# add_SMA(df, 'USD_Close', 100, "USD")
 
 add_EMA(df, 'USD_Close', 5, "USD")
 add_EMA(df, 'USD_Close', 10, "USD")
 add_EMA(df, 'USD_Close', 25, "USD")
 add_EMA(df, 'USD_Close', 50, "USD")
-add_EMA(df, 'USD_Close', 100, "USD")
+# add_EMA(df, 'USD_Close', 100, "USD")
 
 # %%- get rid of nan
 
@@ -412,8 +412,11 @@ columns_shift = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'KC_SMA_10',
                  'KC_SMA_20', 'KC_SMA_50', 'KC_SMA_100', 'KC_SMA_200', 'KC_EMA_10',
                  'KC_EMA_20', 'KC_EMA_50', 'KC_EMA_100', 'KC_EMA_200', 'KC_ADX_14',
                  'KC_CCI_14', 'KC_Slowd', 'KC_ROC_10', 'KC_RSI_14', 'KC_Williams_%R_14', ]
-for column in columns_shift:
-    df[column] = df[column].shift(1)
+try:
+    for column in columns_shift:
+        df[column] = df[column].shift(1)
+except KeyError as err:
+        print("not found: ", column)
 
 # %% - get shape
 df = df.dropna()
