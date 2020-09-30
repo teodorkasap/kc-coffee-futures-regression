@@ -375,26 +375,26 @@ df['USD_Williams_%R_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values
 df['USD_Williams_%R_7'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
                                     df['USD_Close'].values, timeperiod=7)
 
-df['USD_Slowk'], df['USD_Slowd'] = talib.STOCH(df['USD_High'].values,
-                                               df['USD_Low'].values,
-                                               df['USD_Close'].values,
-                                               fastk_period=5,
-                                               slowk_period=3,
-                                               slowk_matype=0,
-                                               slowd_period=3,
-                                               slowd_matype=0)
+# df['USD_Slowk'], df['USD_Slowd'] = talib.STOCH(df['USD_High'].values,
+#                                                df['USD_Low'].values,
+#                                                df['USD_Close'].values,
+#                                                fastk_period=5,
+#                                                slowk_period=3,
+#                                                slowk_matype=0,
+#                                                slowd_period=3,
+#                                                slowd_matype=0)
 
 add_SMA(df, 'USD_Close', 5, "USD")
 add_SMA(df, 'USD_Close', 10, "USD")
 add_SMA(df, 'USD_Close', 25, "USD")
 add_SMA(df, 'USD_Close', 50, "USD")
-# add_SMA(df, 'USD_Close', 100, "USD")
+add_SMA(df, 'USD_Close', 100, "USD")
 
 add_EMA(df, 'USD_Close', 5, "USD")
 add_EMA(df, 'USD_Close', 10, "USD")
 add_EMA(df, 'USD_Close', 25, "USD")
 add_EMA(df, 'USD_Close', 50, "USD")
-# add_EMA(df, 'USD_Close', 100, "USD")
+add_EMA(df, 'USD_Close', 100, "USD")
 
 # %%- get rid of nan
 
@@ -459,7 +459,8 @@ y_test = df_test['target']
 
 # %% - build model -adaboost
 
-ada_reg = AdaBoostRegressor(n_estimators=100)
+
+ada_reg = AdaBoostRegressor(n_estimators=500)
 ada_reg.fit(X_train, y_train)
 
 # %% - validation adaboost
@@ -489,6 +490,7 @@ plt.plot(x_ax, adaboost_y_pred, lw=0.8,
          color="red", label="predicted (adaboost)")
 plt.legend()
 plt.show()
+
 
 
 # %% - build model -grad. boost
@@ -528,11 +530,11 @@ plt.show()
 
 xgb_regressor = xgboost.XGBRegressor(
     n_estimators=35,
-    reg_lambda=1,
-    gamma=0.5,
+    reg_lambda=0.1,
+    gamma=0.01,
     max_depth=3,
     subsample=0.5,
-    tree_method='exact'
+    # tree_method='exact'
     # booster="gblinear"
 )
 
