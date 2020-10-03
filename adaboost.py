@@ -3,14 +3,14 @@
 
 # %% - imports
 
-from operator import add
-import time
+# from operator import add
+# import time
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import talib
 import talib.abstract as ta
-from sklearn.preprocessing import MinMaxScaler
+# from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import AdaBoostRegressor, GradientBoostingRegressor
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.metrics import mean_squared_error
@@ -44,7 +44,7 @@ def getOilPriceData(filepath: str):
     columns = ["Date", "CL_Open", "CL_High", "CL_Low",
                "CL_Close", "CL_Adj_Close", "CL_Volume"]
     df.columns = columns
-    df = df.drop(['CL_Volume',"CL_Adj_Close"], axis=1)
+    df = df.drop(['CL_Volume', "CL_Adj_Close"], axis=1)
     df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
     return df
 
@@ -56,9 +56,10 @@ def getSugarPriceData(filepath: str):
     columns = ["Date", "SB_Open", "SB_High", "SB_Low",
                "SB_Close", "SB_Adj_Close", "SB_Volume"]
     df.columns = columns
-    df = df.drop(['SB_Volume',"SB_Adj_Close"], axis=1)
+    df = df.drop(['SB_Volume', "SB_Adj_Close"], axis=1)
     df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
     return df
+
 
 def getCornPriceData(filepath: str):
 
@@ -67,11 +68,9 @@ def getCornPriceData(filepath: str):
     columns = ["Date", "ZC_Open", "ZC_High", "ZC_Low",
                "ZC_Close", "ZC_Adj_Close", "ZC_Volume"]
     df.columns = columns
-    df = df.drop(['ZC_Volume',"ZC_Adj_Close"], axis=1)
+    df = df.drop(['ZC_Volume', "ZC_Adj_Close"], axis=1)
     df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
     return df
-
-
 
 
 # %% - data files
@@ -164,8 +163,6 @@ df = pd.merge(left=df, right=df_sugar, left_on='Date', right_on='Date')
 # df = pd.merge(left=df, right=df_corn, left_on='Date', right_on='Date')
 
 
-
-
 # %%- get exch rate prediction
 
 
@@ -199,9 +196,9 @@ df['CL_Close'].plot(grid=True)
 plt.show()
 
 
-
-
 # %% - calculate Simple Moving Averages
+
+
 def add_SMA(dataframe, colum_name,  period, commodity):
     dataframe['{}_SMA_{}'.format(commodity, period)] = dataframe[colum_name].rolling(
         window=period).mean()
@@ -344,8 +341,6 @@ df['SB_Slowd'] = talib.STOCH(df['SB_High'].values,
 #                              slowd_matype=0)[1]
 
 
-
-
 df['USD_ATR_14'] = talib.ATR(df['USD_High'].values, df['USD_Low'].values,
                              df['USD_Close'].values, timeperiod=14)
 
@@ -416,7 +411,7 @@ try:
     for column in columns_shift:
         df[column] = df[column].shift(1)
 except KeyError as err:
-        print("not found: ", column)
+    print("not found: ", column)
 
 # %% - get shape
 df = df.dropna()
@@ -490,7 +485,6 @@ plt.plot(x_ax, adaboost_y_pred, lw=0.8,
          color="red", label="predicted (adaboost)")
 plt.legend()
 plt.show()
-
 
 
 # %% - build model -grad. boost
