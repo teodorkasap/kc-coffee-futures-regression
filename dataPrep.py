@@ -113,6 +113,14 @@ def addTrix(dataframe: pd.DataFrame,
             talib.TRIX(df['{}_Close'.format(commodity)], timeperiod=p)
 
 
+def addRocr(dataframe: pd.DataFrame,
+            time_periods: List[int],
+            commodity: str):
+    for p in time_periods:
+        dataframe['{}_ROCR_{}'.format(commodity, p)] = \
+            talib.ROCR(df['{}_Close'.format(commodity)], timeperiod=p)
+
+
 def addSinglePeriodFinFeat(dataframe: pd.DataFrame,
                            time_periods: List[int],
                            commodity: str,
@@ -122,7 +130,8 @@ def addSinglePeriodFinFeat(dataframe: pd.DataFrame,
                            willR=True,
                            rsi=True,
                            roc=True,
-                           trix=True):
+                           trix=True,
+                           rocr=True):
     if atr == True:
         addAtr(dataframe, time_periods, commodity)
     if adx == True:
@@ -137,6 +146,8 @@ def addSinglePeriodFinFeat(dataframe: pd.DataFrame,
         addRoc(dataframe, time_periods, commodity)
     if trix == True:
         addTrix(dataframe, time_periods, commodity)
+    if rocr == True:
+        addRocr(dataframe, time_periods, commodity)
 
 
 def addStochSlow(dataframe: pd.DataFrame,
@@ -180,3 +191,5 @@ def addUltOsc(dataframe: pd.DataFrame,
         dataframe['{}_Close'.format(commodity)].values,
         timeperiod1, timeperiod2, timeperiod3
     )
+
+
