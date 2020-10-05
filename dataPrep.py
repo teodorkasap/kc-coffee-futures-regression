@@ -1,5 +1,4 @@
 from numpy.core.function_base import add_newdoc
-from adaboost import add_EMA
 from typing import List
 import pandas as pd
 import talib
@@ -94,7 +93,7 @@ def addRsi(dataframe: pd.DataFrame,
            commodity: str):
     for p in time_periods:
         dataframe['{}_RSI_{}'.format(commodity, p)] = \
-            talib.RSI(df['{}_Close'.format(commodity)], timeperiod=p)
+            talib.RSI(dataframe['{}_Close'.format(commodity)], timeperiod=p)
 
 
 def addRoc(dataframe: pd.DataFrame,
@@ -102,7 +101,7 @@ def addRoc(dataframe: pd.DataFrame,
            commodity: str):
     for p in time_periods:
         dataframe['{}_ROC_{}'.format(commodity, p)] = \
-            talib.ROC(df['{}_Close'.format(commodity)], timeperiod=p)
+            talib.ROC(dataframe['{}_Close'.format(commodity)], timeperiod=p)
 
 
 def addTrix(dataframe: pd.DataFrame,
@@ -110,7 +109,7 @@ def addTrix(dataframe: pd.DataFrame,
             commodity: str):
     for p in time_periods:
         dataframe['{}_TRIX_{}'.format(commodity, p)] = \
-            talib.TRIX(df['{}_Close'.format(commodity)], timeperiod=p)
+            talib.TRIX(dataframe['{}_Close'.format(commodity)], timeperiod=p)
 
 
 def addRocr(dataframe: pd.DataFrame,
@@ -118,7 +117,7 @@ def addRocr(dataframe: pd.DataFrame,
             commodity: str):
     for p in time_periods:
         dataframe['{}_ROCR_{}'.format(commodity, p)] = \
-            talib.ROCR(df['{}_Close'.format(commodity)], timeperiod=p)
+            talib.ROCR(dataframe['{}_Close'.format(commodity)], timeperiod=p)
 
 
 def addSinglePeriodFinFeat(dataframe: pd.DataFrame,
@@ -171,7 +170,7 @@ def addStochFast(dataframe: pd.DataFrame,
                  fastd_period=3,
                  fastd_matype=0):
     dataframe['{}_Fastk'.format(commodity)], dataframe['{}_Fastd'.format(commodity)] = \
-        talib.(dataframe['{}_High'.format(commodity)].values,
+        talib.STOCHF(dataframe['{}_High'.format(commodity)].values,
                dataframe['{}_Low'.format(commodity)].values,
                dataframe['{}_Close'.format(commodity)].values,
                fastk_period, fastd_period, fastd_matype)
