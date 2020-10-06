@@ -415,7 +415,8 @@ except KeyError as err:
 
 # %% - get shape
 df = df.dropna()
-df.columns
+for c in df.columns:
+    print(c)
 
 # %% -
 df
