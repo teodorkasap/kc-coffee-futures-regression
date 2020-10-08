@@ -1,4 +1,4 @@
-from numpy.core.function_base import add_newdoc
+import numpy as np
 from typing import List
 import pandas as pd
 import talib
@@ -27,7 +27,7 @@ def addSma(dataframe: pd.DataFrame,
 
 def addEma(dataframe, colum_name,  period, commodity):
     dataframe['{}_EMA_{}'.format(commodity, period)] = ta.EMA(
-        dataframe, timeperiod=period, price=colum_name)
+        dataframe, colum_name, timeperiod=period)
 
 
 def addSmaEma(dataframe: pd.DataFrame,
@@ -171,9 +171,9 @@ def addStochFast(dataframe: pd.DataFrame,
                  fastd_matype=0):
     dataframe['{}_Fastk'.format(commodity)], dataframe['{}_Fastd'.format(commodity)] = \
         talib.STOCHF(dataframe['{}_High'.format(commodity)].values,
-               dataframe['{}_Low'.format(commodity)].values,
-               dataframe['{}_Close'.format(commodity)].values,
-               fastk_period, fastd_period, fastd_matype)
+                     dataframe['{}_Low'.format(commodity)].values,
+                     dataframe['{}_Close'.format(commodity)].values,
+                     fastk_period, fastd_period, fastd_matype)
 
 
 def addUltOsc(dataframe: pd.DataFrame,
@@ -190,5 +190,3 @@ def addUltOsc(dataframe: pd.DataFrame,
         dataframe['{}_Close'.format(commodity)].values,
         timeperiod1, timeperiod2, timeperiod3
     )
-
-
