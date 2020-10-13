@@ -27,7 +27,7 @@ def addSma(dataframe: pd.DataFrame,
 
 def addEma(dataframe, colum_name,  period, commodity):
     dataframe['{}_EMA_{}'.format(commodity, period)] = ta.EMA(
-        dataframe, colum_name, timeperiod=period)
+        dataframe=dataframe, colum_name=colum_name, timeperiod=period)
 
 
 def addSmaEma(dataframe: pd.DataFrame,
@@ -38,7 +38,8 @@ def addSmaEma(dataframe: pd.DataFrame,
               sma: bool = False):
     if ema == True:
         for p in periods:
-            addEma(dataframe, colum_name, p, commodity)
+            addEma(dataframe=dataframe, colum_name=colum_name,
+                   period=p, commodity=commodity)
     if sma == True:
         for p in periods:
             addSma(dataframe, colum_name, p, commodity)

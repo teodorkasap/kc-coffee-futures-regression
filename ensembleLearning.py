@@ -1,5 +1,6 @@
 # %% - imports
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import AdaBoostRegressor, GradientBoostingRegressor
@@ -23,8 +24,8 @@ InteractiveShell.ast_node_interactivity = "all"
 file_usd_brl = "USD_BRL Historical Data-25092020.csv"
 df_usd_brl = getInvComData(file_usd_brl, "USDBR")
 
-# file_sugar = "SBK21.NYB(1).csv"
-# df_sugar = getYahFinData(file_sugar, "SB")
+file_sugar = "SBK21.NYB(1).csv"
+df_sugar = getYahFinData(file_sugar, "SB")
 
 file_oil = "CLK21.NYM.csv"
 df_oil = getYahFinData(file_oil, "CL")
@@ -40,7 +41,7 @@ df_T_note_2y = getYahFinData(US_T_note_2_year_file, "ZT")
 
 # %% - start merging data frames
 df = pd.merge(left=df_coffe, right=df_usd_brl, left_on='Date', right_on='Date')
-# df = pd.merge(left=df, right=df_sugar, left_on='Date', right_on='Date')
+df = pd.merge(left=df, right=df_sugar, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_oil, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_usd_cop, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_T_note_2y, left_on='Date', right_on='Date')
@@ -66,50 +67,51 @@ df = df.dropna()
 # %% - add EMA & SMA
 periods = [5, 10]
 
-addSmaEma(df, "KC_Close", periods, "KC")
-addSmaEma(df, "USDBR_Close", periods, "USDBR", sma=False)
-addSmaEma(df, "USDCP_Close", periods, "USDCP", sma=False)
-addSmaEma(df, "SB_Close", periods, "SB",sma=False)
-addSmaEma(df, "CL_Close", periods, "CL", sma=False)
-addSmaEma(df, "ZT_Close", periods, "ZT", sma=False)
+addSmaEma(dataframe=df, colum_name="KC_Close",
+          periods=periods, commodity="KC", ema=False)
+addSmaEma(df, "USDBR_Close", periods, "USDBR", ema=False)
+addSmaEma(df, "USDCP_Close", periods, "USDCP", ema=False)
+# addSmaEma(df, "SB_Close", periods, "SB",ema=False)
+addSmaEma(df, "CL_Close", periods, "CL", ema=False)
+addSmaEma(df, "ZT_Close", periods, "ZT", ema=False)
 
 # %% - add other financial features
 
-periods = [7,14]
+periods = [7, 14]
 
-addSinglePeriodFinFeat(df, periods, "KC", trix=False, rocr=False,
+addSinglePeriodFinFeat(df, periods, "KC", trix=True, rocr=True, rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
+addSinglePeriodFinFeat(df, periods, "USDBR", trix=True, rocr=True, rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
+addSinglePeriodFinFeat(df, periods, "USDCP", trix=True, rocr=True,  rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
+addSinglePeriodFinFeat(df, periods, "SB", trix=True, rocr=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True, rsi=True)
-addSinglePeriodFinFeat(df, periods, "USDBR", trix=False, rocr=False,
-                       willR=True, roc=True, atr=True, adx=True, cci=True, rsi=True)
-addSinglePeriodFinFeat(df, periods, "USDCP", trix=False, rocr=False,
-                       willR=False, roc=True, atr=True, adx=True, cci=True, rsi=True)
-# # addSinglePeriodFinFeat(df, periods, "SB", trix=True, rocr=True,
-# #                        willR=True, roc=True, atr=True, adx=True, cci=True, rsi=True)
-addSinglePeriodFinFeat(df, periods, "CL", trix=False, rocr=False,
-                       willR=False, roc=True, atr=True, adx=True, cci=True, rsi=True)
-addSinglePeriodFinFeat(df, periods, "ZT", trix=False, rocr=False,
-                       willR=False, roc=True, atr=True, adx=True, cci=True, rsi=True)
+addSinglePeriodFinFeat(df, periods, "CL", trix=True, rocr=True, rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
+addSinglePeriodFinFeat(df, periods, "ZT", trix=True, rocr=True, rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
 
-# addStochFast(df, "KC")
-# addStochFast(df, "USDBR")
-# addStochFast(df, "USDCP")
-# # addStochFast(df, "SB")
-# addStochFast(df, "CL")
-# addStochFast(df,"ZT")
+addStochFast(df, "KC")
+addStochFast(df, "USDBR")
+addStochFast(df, "USDCP")
+addStochFast(df, "SB")
+addStochFast(df, "CL")
+addStochFast(df, "ZT")
 
 addStochSlow(df, "KC")
 addStochSlow(df, "USDBR")
 addStochSlow(df, "USDCP")
-# # addStochSlow(df, "SB")
+addStochSlow(df, "SB")
 addStochSlow(df, "CL")
-addStochSlow(df,"ZT")
+addStochSlow(df, "ZT")
 
-# addUltOsc(df, "KC")
-# addUltOsc(df, "USDBR")
-# addUltOsc(df, "USDCP")
-# # addUltOsc(df, "SB")
-# addUltOsc(df, "CL")
-# addUltOsc(df,"ZT")
+addUltOsc(df, "KC")
+addUltOsc(df, "USDBR")
+addUltOsc(df, "USDCP")
+addUltOsc(df, "SB")
+addUltOsc(df, "CL")
+addUltOsc(df, "ZT")
 
 df.shape
 df.dropna()
@@ -129,8 +131,10 @@ for c in df.columns:
     print(c)
 
 # %% - eliminate unnecessary cols
-cols_eliminate = ['KC_High', 'KC_Low', 'USDBR_High', 'USDBR_Low', 'USDBR_Change %',
-                  'CL_High', 'CL_Low', 'USDCP_High', 'USDCP_Low', 'ZT_High', 'ZT_Low']
+cols_eliminate = ['KC_High', 'KC_Low', 'USDBR_High', 'USDBR_Low',
+                  'USDBR_Change %',
+                  'CL_High', 'CL_Low', 'USDCP_High', 'USDCP_Low', 'ZT_High',
+                  'ZT_Low']
 for c in cols_eliminate:
     try:
         df = df.drop(c, axis=1)
@@ -162,7 +166,8 @@ ada_reg.fit(X_train, y_train)
 
 # Grad.Boost
 grad_reg = GradientBoostingRegressor(
-    n_estimators=50, subsample=0.8, max_depth=2, criterion="mse", learning_rate=0.1)
+    n_estimators=50, subsample=0.8, max_depth=2, criterion="mse",
+    learning_rate=0.1)
 grad_reg.fit(X_train, y_train)
 
 # XGBoost
@@ -238,3 +243,39 @@ print("RMSE: %.2f" % np.sqrt(mse_test))
 print("****************")
 print("****************")
 print()
+
+
+# %% - select features
+sel_regressor = xgboost.XGBRegressor(
+    gamma=0.0, n_estimators=150, base_score=0.7, colsample_bytree=1,
+    learning_rate=0.05)
+
+
+xgbModel = sel_regressor.fit(X_train, y_train,
+                             eval_set=[(X_train, y_train), (x_test, y_test)],
+                             verbose=False)
+
+eval_result = sel_regressor.evals_result()
+
+training_rounds = range(len(eval_result['validation_0']['rmse']))
+
+# %% - plot training and validation errors
+
+%matplotlib inline
+
+plt.scatter(x=training_rounds,
+            y=eval_result['validation_0']['rmse'], label='Training Error')
+plt.scatter(x=training_rounds,
+            y=eval_result['validation_1']['rmse'], label='Validation Error')
+plt.xlabel('Iterations')
+plt.ylabel('RMSE')
+plt.title('Training Vs Validation Error')
+plt.legend()
+plt.show()
+
+fig = plt.figure(figsize=(16, 16))
+plt.xticks(rotation='vertical', fontsize=5)
+plt.bar([i for i in range(len(xgbModel.feature_importances_))],
+        xgbModel.feature_importances_.tolist(), tick_label=x_test.columns)
+plt.title('Figure 6: Feature importance of the technical indicators.')
+plt.show()
