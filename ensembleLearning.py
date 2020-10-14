@@ -39,12 +39,17 @@ df_usd_cop = getYahFinData(file_usd_cop, "USDCP")
 US_T_note_2_year_file = "ZT=F.csv"
 df_T_note_2y = getYahFinData(US_T_note_2_year_file, "ZT")
 
+US_T_note_5_year_file = 'ZF=F.csv'
+df_T_note_5y = getYahFinData(US_T_note_2_year_file, "ZF")
+
+
 # %% - start merging data frames
 df = pd.merge(left=df_coffe, right=df_usd_brl, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_sugar, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_oil, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_usd_cop, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_T_note_2y, left_on='Date', right_on='Date')
+df = pd.merge(left=df, right=df_T_note_5y, left_on='Date', right_on='Date')
 
 
 # %% - set index
@@ -56,16 +61,18 @@ df.columns
 columns = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'USDBR_Close', 'USDBR_Open',
            'USDBR_High', 'USDBR_Low', 'USDBR_Change %', 'CL_Open', 'CL_High',
            'CL_Low', 'CL_Close', 'USDCP_Open', 'USDCP_High', 'USDCP_Low',
-           'USDCP_Close', 'ZT_Open', 'ZT_High', 'ZT_Low', 'ZT_Close', ]
+           'USDCP_Close', 'ZT_Open', 'ZT_High', 'ZT_Low', 'ZT_Close',
+           'ZF_Open', 'ZF_High', 'ZF_Low', 'ZF_Close'
+           ]
 
 
-shiftColumns(df, columns, 1)
+shiftColumns(df, columns, 5)
 
 # %% - drop nan
 df = df.dropna()
 
 # %% - add EMA & SMA
-periods = [5, 10]
+periods = [5, 7, 10, 14]
 
 addSmaEmaWma(dataframe=df, colum_name="KC_Close",
              periods=periods, commodity="KC")
@@ -74,6 +81,8 @@ addSmaEmaWma(df, "USDCP_Close", periods, "USDCP")
 addSmaEmaWma(df, "SB_Close", periods, "SB")
 addSmaEmaWma(df, "CL_Close", periods, "CL")
 addSmaEmaWma(df, "ZT_Close", periods, "ZT")
+addSmaEmaWma(df, "ZF_Close", periods, "ZF")
+
 
 # %% - add other financial features
 
@@ -92,6 +101,8 @@ addSinglePeriodFinFeat(df, periods, "CL", trix=True, rocr=True, rsi=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True)
 addSinglePeriodFinFeat(df, periods, "ZT", trix=True, rocr=True, rsi=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True)
+addSinglePeriodFinFeat(df, periods, "ZF", trix=True, rocr=True, rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
 
 addStochFast(df, "KC")
 addStochFast(df, "USDBR")
@@ -99,6 +110,7 @@ addStochFast(df, "USDCP")
 addStochFast(df, "SB")
 addStochFast(df, "CL")
 addStochFast(df, "ZT")
+addStochFast(df, "ZF")
 
 addStochSlow(df, "KC")
 addStochSlow(df, "USDBR")
@@ -106,6 +118,7 @@ addStochSlow(df, "USDCP")
 addStochSlow(df, "SB")
 addStochSlow(df, "CL")
 addStochSlow(df, "ZT")
+addStochSlow(df, "ZF")
 
 addUltOsc(df, "KC")
 addUltOsc(df, "USDBR")
@@ -113,6 +126,7 @@ addUltOsc(df, "USDCP")
 addUltOsc(df, "SB")
 addUltOsc(df, "CL")
 addUltOsc(df, "ZT")
+addUltOsc(df, "ZF")
 
 df.shape
 df.dropna()
@@ -143,6 +157,10 @@ for c in df.columns:
 #         df = df.drop(c, axis=1)
 #     except KeyError:
 #         print("column {} not found, skipping".format(c))
+
+# %% - select features
+# df = df[['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'ZT_Low',
+#          'KC_WMA_5', 'KC_WMA_7', 'ZT_EMA_5', 'ZT_SMA_10', 'target']]
 
 # %% - train test split
 cutoff = int(round((df.shape[0])*0.8))
@@ -276,7 +294,8 @@ plt.title('Training Vs Validation Error')
 plt.legend()
 plt.show()
 
-fig = plt.figure(figsize=(16, 16))
+# %% - plot feature importance
+fig = plt.figure(figsize=(20, 20))
 plt.xticks(rotation='vertical', fontsize=5)
 plt.bar([i for i in range(len(xgbModel.feature_importances_))],
         xgbModel.feature_importances_.tolist(), tick_label=x_test.columns)
