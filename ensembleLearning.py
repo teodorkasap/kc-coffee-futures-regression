@@ -11,7 +11,7 @@ import xgboost
 
 # own modules
 from dataLoader import getInvComData, getYahFinData
-from dataPrep import shiftColumns, addSmaEma, addSinglePeriodFinFeat, \
+from dataPrep import shiftColumns, addSmaEmaWma, addSinglePeriodFinFeat, \
     addStochFast, addStochSlow, addUltOsc
 
 
@@ -67,13 +67,13 @@ df = df.dropna()
 # %% - add EMA & SMA
 periods = [5, 10]
 
-addSmaEma(dataframe=df, colum_name="KC_Close",
-          periods=periods, commodity="KC", ema=False)
-addSmaEma(df, "USDBR_Close", periods, "USDBR", ema=False)
-addSmaEma(df, "USDCP_Close", periods, "USDCP", ema=False)
-# addSmaEma(df, "SB_Close", periods, "SB",ema=False)
-addSmaEma(df, "CL_Close", periods, "CL", ema=False)
-addSmaEma(df, "ZT_Close", periods, "ZT", ema=False)
+addSmaEmaWma(dataframe=df, colum_name="KC_Close",
+             periods=periods, commodity="KC")
+addSmaEmaWma(df, "USDBR_Close", periods, "USDBR")
+addSmaEmaWma(df, "USDCP_Close", periods, "USDCP")
+addSmaEmaWma(df, "SB_Close", periods, "SB")
+addSmaEmaWma(df, "CL_Close", periods, "CL")
+addSmaEmaWma(df, "ZT_Close", periods, "ZT")
 
 # %% - add other financial features
 
@@ -86,7 +86,8 @@ addSinglePeriodFinFeat(df, periods, "USDBR", trix=True, rocr=True, rsi=True,
 addSinglePeriodFinFeat(df, periods, "USDCP", trix=True, rocr=True,  rsi=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True)
 addSinglePeriodFinFeat(df, periods, "SB", trix=True, rocr=True,
-                       willR=True, roc=True, atr=True, adx=True, cci=True, rsi=True)
+                       willR=True, roc=True, atr=True, adx=True, cci=True,
+                       rsi=True)
 addSinglePeriodFinFeat(df, periods, "CL", trix=True, rocr=True, rsi=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True)
 addSinglePeriodFinFeat(df, periods, "ZT", trix=True, rocr=True, rsi=True,
@@ -131,15 +132,17 @@ for c in df.columns:
     print(c)
 
 # %% - eliminate unnecessary cols
-cols_eliminate = ['KC_High', 'KC_Low', 'USDBR_High', 'USDBR_Low',
-                  'USDBR_Change %',
-                  'CL_High', 'CL_Low', 'USDCP_High', 'USDCP_Low', 'ZT_High',
-                  'ZT_Low']
-for c in cols_eliminate:
-    try:
-        df = df.drop(c, axis=1)
-    except KeyError:
-        print("column {} not found, skipping".format(c))
+
+
+# cols_eliminate = ['KC_High', 'KC_Low', 'USDBR_High', 'USDBR_Low',
+#                   'USDBR_Change %',
+#                   'CL_High', 'CL_Low', 'USDCP_High', 'USDCP_Low', 'ZT_High',
+#                   'ZT_Low']
+# for c in cols_eliminate:
+#     try:
+#         df = df.drop(c, axis=1)
+#     except KeyError:
+#         print("column {} not found, skipping".format(c))
 
 # %% - train test split
 cutoff = int(round((df.shape[0])*0.8))

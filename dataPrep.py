@@ -17,32 +17,43 @@ def shiftColumns(data_frame: pd.DataFrame,
     return data_frame
 
 
+def addWma(dataframe, colum_name, period, commodity):
+    weights = np.arange(1, period+1)
+    dataframe['{}_WMA_{}'.format(commodity, period)] = \
+        dataframe[colum_name].rolling(period).apply(
+            lambda prices: np.dot(prices, weights)/weights.sum(), raw=True)
+
+
 def addSma(dataframe: pd.DataFrame,
            colum_name: str,
            period: int,
            commodity: str):
-    dataframe['{}_SMA_{}'.format(commodity, period)] = dataframe[colum_name].rolling(
-        window=period).mean()
+    dataframe['{}_SMA_{}'.format(commodity, period)] = dataframe[colum_name].\
+        rolling(window=period).mean()
 
 
 def addEma(dataframe, colum_name,  period, commodity):
-    dataframe['{}_EMA_{}'.format(commodity, period)] = ta.EMA(
-        dataframe=dataframe, colum_name=colum_name, timeperiod=period)
+    dataframe['{}_EMA_{}'.format(commodity, period)] = \
+        dataframe[colum_name].ewm(span=period).mean()
 
 
-def addSmaEma(dataframe: pd.DataFrame,
-              colum_name: str,
-              periods: List[int],
-              commodity: str,
-              ema: bool = True,
-              sma: bool = False):
-    if ema == True:
+def addSmaEmaWma(dataframe: pd.DataFrame,
+                 colum_name: str,
+                 periods: List[int],
+                 commodity: str,
+                 ema: bool = True,
+                 sma: bool = True,
+                 wma: bool = True):
+    if ema is True:
         for p in periods:
             addEma(dataframe=dataframe, colum_name=colum_name,
                    period=p, commodity=commodity)
-    if sma == True:
+    if sma is True:
         for p in periods:
             addSma(dataframe, colum_name, p, commodity)
+    if wma is True:
+        for p in periods:
+            addWma(dataframe, colum_name, p, commodity)
 
 
 def addAtr(dataframe: pd.DataFrame,
