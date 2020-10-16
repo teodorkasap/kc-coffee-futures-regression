@@ -42,6 +42,12 @@ df_T_note_2y = getYahFinData(US_T_note_2_year_file, "ZT")
 US_T_note_5_year_file = 'ZF=F.csv'
 df_T_note_5y = getYahFinData(US_T_note_2_year_file, "ZF")
 
+file_corn = 'ZCK21.CBT(1).csv'
+df_corn = getYahFinData(file_corn, 'ZC')
+
+file_SP_500_fut = 'US 500 Futures Historical Data.csv'
+df_sp500 = getInvComData(file_SP_500_fut, 'SP')
+
 
 # %% - start merging data frames
 df = pd.merge(left=df_coffe, right=df_usd_brl, left_on='Date', right_on='Date')
@@ -50,6 +56,8 @@ df = pd.merge(left=df, right=df_oil, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_usd_cop, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_T_note_2y, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_T_note_5y, left_on='Date', right_on='Date')
+df = pd.merge(left=df, right=df_corn, left_on='Date', right_on='Date')
+df = pd.merge(left=df, right=df_sp500, left_on='Date', right_on='Date')
 
 
 # %% - set index
@@ -62,11 +70,13 @@ columns = ['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'USDBR_Close', 'USDBR_Ope
            'USDBR_High', 'USDBR_Low', 'USDBR_Change %', 'CL_Open', 'CL_High',
            'CL_Low', 'CL_Close', 'USDCP_Open', 'USDCP_High', 'USDCP_Low',
            'USDCP_Close', 'ZT_Open', 'ZT_High', 'ZT_Low', 'ZT_Close',
-           'ZF_Open', 'ZF_High', 'ZF_Low', 'ZF_Close'
+           'ZF_Open', 'ZF_High', 'ZF_Low', 'ZF_Close',
+           'ZC_Open', 'ZC_High', 'ZC_Low', 'ZC_Close',
+           'SP_Open', 'SP_High', 'SP_Low', 'SP_Close'
            ]
 
 
-shiftColumns(df, columns, 5)
+shiftColumns(df, columns, 1)
 
 # %% - drop nan
 df = df.dropna()
@@ -82,6 +92,8 @@ addSmaEmaWma(df, "SB_Close", periods, "SB")
 addSmaEmaWma(df, "CL_Close", periods, "CL")
 addSmaEmaWma(df, "ZT_Close", periods, "ZT")
 addSmaEmaWma(df, "ZF_Close", periods, "ZF")
+addSmaEmaWma(df, "ZC_Close", periods, "ZC")
+addSmaEmaWma(df, "SP_Close", periods, "SP")
 
 
 # %% - add other financial features
@@ -103,6 +115,11 @@ addSinglePeriodFinFeat(df, periods, "ZT", trix=True, rocr=True, rsi=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True)
 addSinglePeriodFinFeat(df, periods, "ZF", trix=True, rocr=True, rsi=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True)
+addSinglePeriodFinFeat(df, periods, "ZC", trix=True, rocr=True, rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
+addSinglePeriodFinFeat(df, periods, "SP", trix=True, rocr=True, rsi=True,
+                       willR=True, roc=True, atr=True, adx=True, cci=True)
+
 
 addStochFast(df, "KC")
 addStochFast(df, "USDBR")
@@ -111,6 +128,8 @@ addStochFast(df, "SB")
 addStochFast(df, "CL")
 addStochFast(df, "ZT")
 addStochFast(df, "ZF")
+addStochFast(df, "ZC")
+addStochFast(df, "SP")
 
 addStochSlow(df, "KC")
 addStochSlow(df, "USDBR")
@@ -119,6 +138,8 @@ addStochSlow(df, "SB")
 addStochSlow(df, "CL")
 addStochSlow(df, "ZT")
 addStochSlow(df, "ZF")
+addStochSlow(df, "ZC")
+addStochSlow(df, "SP")
 
 addUltOsc(df, "KC")
 addUltOsc(df, "USDBR")
@@ -127,6 +148,8 @@ addUltOsc(df, "SB")
 addUltOsc(df, "CL")
 addUltOsc(df, "ZT")
 addUltOsc(df, "ZF")
+addUltOsc(df, "ZC")
+addUltOsc(df, "SP")
 
 df.shape
 df.dropna()
@@ -202,68 +225,68 @@ xgb_regressor.fit(X_train, y_train)
 # %% - Validation
 
 # Adaboost
-print("****************")
-print("*** Adaboost ***")
-print("****************")
+# print("****************")
+# print("*** Adaboost ***")
+# print("****************")
 
-scores = cross_val_score(ada_reg, X_train, y_train, cv=5)
-print("Mean cross-validataion score: %.2f" % scores.mean())
+# scores = cross_val_score(ada_reg, X_train, y_train, cv=5)
+# print("Mean cross-validataion score: %.2f" % scores.mean())
 
 
-kfold = KFold(n_splits=10, shuffle=True)
-kf_cv_scores = cross_val_score(ada_reg, X_train, y_train, cv=kfold)
-print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+# kfold = KFold(n_splits=10, shuffle=True)
+# kf_cv_scores = cross_val_score(ada_reg, X_train, y_train, cv=kfold)
+# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
-adaboost_y_pred = ada_reg.predict(x_test)
-mse_test = mean_squared_error(y_test, adaboost_y_pred)
-print("MSE: %.2f" % mse_test)
-print("RMSE: %.2f" % np.sqrt(mse_test))
+# adaboost_y_pred = ada_reg.predict(x_test)
+# mse_test = mean_squared_error(y_test, adaboost_y_pred)
+# print("MSE: %.2f" % mse_test)
+# print("RMSE: %.2f" % np.sqrt(mse_test))
 
-print("****************")
-print("****************")
-print()
+# print("****************")
+# print("****************")
+# print()
 
 # Grad.Boost
-print("****************")
-print("** GradBoost ***")
-print("****************")
+# print("****************")
+# print("** GradBoost ***")
+# print("****************")
 
-scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
-print("Mean cross-validataion score: %.2f" % scores.mean())
+# scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
+# print("Mean cross-validataion score: %.2f" % scores.mean())
 
-kfold = KFold(n_splits=10, shuffle=True)
-kf_cv_scores = cross_val_score(grad_reg, X_train, y_train, cv=kfold)
-print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+# kfold = KFold(n_splits=10, shuffle=True)
+# kf_cv_scores = cross_val_score(grad_reg, X_train, y_train, cv=kfold)
+# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
-grad_boost_y_pred = grad_reg.predict(x_test)
-mse_test = mean_squared_error(y_test, grad_boost_y_pred)
-print("MSE: %.2f" % mse_test)
-print("RMSE: %.2f" % np.sqrt(mse_test))
+# grad_boost_y_pred = grad_reg.predict(x_test)
+# mse_test = mean_squared_error(y_test, grad_boost_y_pred)
+# print("MSE: %.2f" % mse_test)
+# print("RMSE: %.2f" % np.sqrt(mse_test))
 
-print("****************")
-print("****************")
-print()
+# print("****************")
+# print("****************")
+# print()
 
 # XGBoost
-print("****************")
-print("*** XGBoost ****")
-print("****************")
+# print("****************")
+# print("*** XGBoost ****")
+# print("****************")
 
-scores = cross_val_score(xgb_regressor, X_train, y_train, cv=5)
-print("Mean cross-validataion score: %.2f" % scores.mean())
+# scores = cross_val_score(xgb_regressor, X_train, y_train, cv=5)
+# print("Mean cross-validataion score: %.2f" % scores.mean())
 
-kfold = KFold(n_splits=10, shuffle=True)
-kf_cv_scores = cross_val_score(xgb_regressor, X_train, y_train, cv=kfold)
-print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+# kfold = KFold(n_splits=10, shuffle=True)
+# kf_cv_scores = cross_val_score(xgb_regressor, X_train, y_train, cv=kfold)
+# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
 
-xgb_reg_y_pred = xgb_regressor.predict(x_test)
-mse_test = mean_squared_error(y_test, xgb_reg_y_pred)
-print("MSE: %.2f" % mse_test)
-print("RMSE: %.2f" % np.sqrt(mse_test))
+# xgb_reg_y_pred = xgb_regressor.predict(x_test)
+# mse_test = mean_squared_error(y_test, xgb_reg_y_pred)
+# print("MSE: %.2f" % mse_test)
+# print("RMSE: %.2f" % np.sqrt(mse_test))
 
-print("****************")
-print("****************")
-print()
+# print("****************")
+# print("****************")
+# print()
 
 
 # %% - select features
@@ -295,9 +318,9 @@ plt.legend()
 plt.show()
 
 # %% - plot feature importance
-fig = plt.figure(figsize=(20, 20))
+fig = plt.figure(figsize=(30, 10))
 plt.xticks(rotation='vertical', fontsize=5)
 plt.bar([i for i in range(len(xgbModel.feature_importances_))],
         xgbModel.feature_importances_.tolist(), tick_label=x_test.columns)
-plt.title('Figure 6: Feature importance of the technical indicators.')
+plt.title('Feature importance in comparison.')
 plt.show()

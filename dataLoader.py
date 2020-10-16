@@ -5,7 +5,11 @@ import numpy as np
 def getInvComData(filepath: str,
                   name: str) -> pd.DataFrame:
 
-    df = pd.read_csv(filepath)
+    df = pd.read_csv(filepath, decimal='.',thousands=',')
+    try:
+        df = df.drop(['Vol.'], axis=1)
+    except KeyError:
+        print('Vol. column not found, skipping')
     df['Date'] = pd.to_datetime(df['Date'], format='%b %d, %Y')
     df.columns
     columns = ['Date', '{}_Close'.format(name),	'{}_Open'.format(name),
@@ -15,6 +19,10 @@ def getInvComData(filepath: str,
     df['{}_Change %'.format(name)] = \
         df['{}_Change %'.format(name)].str.replace('%', '').\
         astype('float') / 100.0
+    # df = df.replace(',', '', regex=True).values
+    # for c in df.columns:
+    #     if not c == 'Date':
+    #         df[c] = pd.to_numeric(df[c], errors='coerce')
     return df
 
 
