@@ -237,7 +237,7 @@ importances = xgbModel.feature_importances_.tolist()
 features = []
 for i, l in zip(importances, x_test.columns):
     print(i, l)
-    if i > 0 :
+    if i > 0:
         features.append(l)
 
 df = df[features]
@@ -324,8 +324,8 @@ print()
 
 # XGBoost
 xgb_regressor = xgboost.XGBRegressor(
-    n_estimators=50, reg_lambda=0.1,
-    gamma=0.5, max_depth=2, subsample=0.9,
+    n_estimators=100, reg_lambda=0.1,
+    gamma=0, max_depth=2, subsample=0.9, learning_rate=0.332
     # tree_method='exact',
 )
 xgb_regressor.fit(X_train, y_train)
