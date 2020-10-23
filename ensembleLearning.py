@@ -12,7 +12,7 @@ import xgboost
 # own modules
 from dataLoader import getInvComData, getYahFinData
 from dataPrep import shiftColumns, addSmaEmaWma, addSinglePeriodFinFeat, \
-    addStochFast, addStochSlow, addUltOsc
+    addStochFast, addStochSlow, addUltOsc, addWeekDay
 
 
 # This is for multiple print statements per cell
@@ -59,6 +59,10 @@ df = pd.merge(left=df, right=df_T_note_5y, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_corn, left_on='Date', right_on='Date')
 df = pd.merge(left=df, right=df_sp500, left_on='Date', right_on='Date')
 
+# %% - add weekday number
+
+addWeekDay(df, 'Date')
+
 
 # %% - set index
 df = df.set_index('Date')
@@ -98,7 +102,7 @@ addSmaEmaWma(df, "SP_Close", periods, "SP")
 
 # %% - add other financial features
 
-periods = [7, 14]
+periods = [7, 10, 14, 20]
 
 addSinglePeriodFinFeat(df, periods, "KC", trix=True, rocr=True, rsi=True,
                        willR=True, roc=True, atr=True, adx=True, cci=True)

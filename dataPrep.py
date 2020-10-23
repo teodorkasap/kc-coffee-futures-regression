@@ -3,6 +3,7 @@ from typing import List
 import pandas as pd
 import talib
 import talib.abstract as ta
+import datetime
 
 
 def shiftColumns(data_frame: pd.DataFrame,
@@ -143,21 +144,21 @@ def addSinglePeriodFinFeat(dataframe: pd.DataFrame,
                            roc=True,
                            trix=True,
                            rocr=True):
-    if atr == True:
+    if atr is True:
         addAtr(dataframe, time_periods, commodity)
-    if adx == True:
+    if adx is True:
         addAdx(dataframe, time_periods, commodity)
-    if cci == True:
+    if cci is True:
         addCci(dataframe, time_periods, commodity)
-    if willR == True:
+    if willR is True:
         addWillR(dataframe, time_periods, commodity)
-    if rsi == True:
+    if rsi is True:
         addRsi(dataframe, time_periods, commodity)
-    if roc == True:
+    if roc is True:
         addRoc(dataframe, time_periods, commodity)
-    if trix == True:
+    if trix is True:
         addTrix(dataframe, time_periods, commodity)
-    if rocr == True:
+    if rocr is True:
         addRocr(dataframe, time_periods, commodity)
 
 
@@ -202,3 +203,7 @@ def addUltOsc(dataframe: pd.DataFrame,
         dataframe['{}_Close'.format(commodity)].values,
         timeperiod1, timeperiod2, timeperiod3
     )
+
+
+def addWeekDay(df: pd.DataFrame, date_column: str):
+    df['day_of_week'] = df.apply(lambda x: x[date_column].weekday(), axis=1)
