@@ -234,8 +234,15 @@ plt.show()
 
 # %%
 importances = xgbModel.feature_importances_.tolist()
+features = []
 for i, l in zip(importances, x_test.columns):
     print(i, l)
+    if i > 0 :
+        features.append(l)
+
+df = df[features]
+df.columns
+
 # %% - eliminate unnecessary cols
 
 
