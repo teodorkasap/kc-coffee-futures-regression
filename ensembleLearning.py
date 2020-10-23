@@ -158,7 +158,7 @@ addUltOsc(df, "SP")
 
 # %% - adding BBands
 
-df = addBBands(df, "KC", 20) # Todo - returns NaN , no value!
+addBBands(df, "KC", 5)
 
 # %%
 df.shape
@@ -178,23 +178,6 @@ df.shape
 for c in df.columns:
     print(c)
 
-# %% - eliminate unnecessary cols
-
-
-# cols_eliminate = ['KC_High', 'KC_Low', 'USDBR_High', 'USDBR_Low',
-#                   'USDBR_Change %',
-#                   'CL_High', 'CL_Low', 'USDCP_High', 'USDCP_Low', 'ZT_High',
-#                   'ZT_Low']
-# for c in cols_eliminate:
-#     try:
-#         df = df.drop(c, axis=1)
-#     except KeyError:
-#         print("column {} not found, skipping".format(c))
-
-# %% - select features
-# df = df[['KC_Open', 'KC_High', 'KC_Low', 'KC_Close', 'ZT_Low',
-#          'KC_WMA_5', 'KC_WMA_7', 'ZT_EMA_5', 'ZT_SMA_10', 'target']]
-
 # %% - train test split
 cutoff = int(round((df.shape[0])*0.8))
 
@@ -210,93 +193,6 @@ y_test = df_test['target']
 
 df_train
 df_test
-
-
-# %% - define models
-
-# Adaboost
-ada_reg = AdaBoostRegressor(n_estimators=500)
-ada_reg.fit(X_train, y_train)
-
-# Grad.Boost
-grad_reg = GradientBoostingRegressor(
-    n_estimators=50, subsample=0.8, max_depth=2, criterion="mse",
-    learning_rate=0.1)
-grad_reg.fit(X_train, y_train)
-
-# XGBoost
-xgb_regressor = xgboost.XGBRegressor(
-    n_estimators=35, reg_lambda=0.1,
-    gamma=0.01, max_depth=2, subsample=0.9,
-    # tree_method='exact',
-)
-xgb_regressor.fit(X_train, y_train)
-
-# %% - Validation
-
-# Adaboost
-# print("****************")
-# print("*** Adaboost ***")
-# print("****************")
-
-# scores = cross_val_score(ada_reg, X_train, y_train, cv=5)
-# print("Mean cross-validataion score: %.2f" % scores.mean())
-
-
-# kfold = KFold(n_splits=10, shuffle=True)
-# kf_cv_scores = cross_val_score(ada_reg, X_train, y_train, cv=kfold)
-# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
-
-# adaboost_y_pred = ada_reg.predict(x_test)
-# mse_test = mean_squared_error(y_test, adaboost_y_pred)
-# print("MSE: %.2f" % mse_test)
-# print("RMSE: %.2f" % np.sqrt(mse_test))
-
-# print("****************")
-# print("****************")
-# print()
-
-# Grad.Boost
-# print("****************")
-# print("** GradBoost ***")
-# print("****************")
-
-# scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
-# print("Mean cross-validataion score: %.2f" % scores.mean())
-
-# kfold = KFold(n_splits=10, shuffle=True)
-# kf_cv_scores = cross_val_score(grad_reg, X_train, y_train, cv=kfold)
-# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
-
-# grad_boost_y_pred = grad_reg.predict(x_test)
-# mse_test = mean_squared_error(y_test, grad_boost_y_pred)
-# print("MSE: %.2f" % mse_test)
-# print("RMSE: %.2f" % np.sqrt(mse_test))
-
-# print("****************")
-# print("****************")
-# print()
-
-# XGBoost
-# print("****************")
-# print("*** XGBoost ****")
-# print("****************")
-
-# scores = cross_val_score(xgb_regressor, X_train, y_train, cv=5)
-# print("Mean cross-validataion score: %.2f" % scores.mean())
-
-# kfold = KFold(n_splits=10, shuffle=True)
-# kf_cv_scores = cross_val_score(xgb_regressor, X_train, y_train, cv=kfold)
-# print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
-
-# xgb_reg_y_pred = xgb_regressor.predict(x_test)
-# mse_test = mean_squared_error(y_test, xgb_reg_y_pred)
-# print("MSE: %.2f" % mse_test)
-# print("RMSE: %.2f" % np.sqrt(mse_test))
-
-# print("****************")
-# print("****************")
-# print()
 
 
 # %% - select features
@@ -328,9 +224,137 @@ plt.legend()
 plt.show()
 
 # %% - plot feature importance
-fig = plt.figure(figsize=(30, 10))
+fig = plt.figure(figsize=(40, 10))
 plt.xticks(rotation='vertical', fontsize=5)
 plt.bar([i for i in range(len(xgbModel.feature_importances_))],
         xgbModel.feature_importances_.tolist(), tick_label=x_test.columns)
 plt.title('Feature importance in comparison.')
+plt.show()
+
+
+# %%
+importances = xgbModel.feature_importances_.tolist()
+for i, l in zip(importances, x_test.columns):
+    print(i, l)
+# %% - eliminate unnecessary cols
+
+
+cols_eliminate = ['USDBR_Open', 'SB_Close', 'SB_Open', 'CL_High', 'CL_Low',
+                  'ZF_Open', 'ZF_High', 'ZF_Low', 'ZF_Close', 'ZC_Open',
+                  'ZC_Low', 'ZC_Close']
+for c in cols_eliminate:
+    try:
+        df = df.drop(c, axis=1)
+    except KeyError:
+        print("column {} not found, skipping".format(c))
+
+# %% - select features
+# df = df[['target', 'KC_High', 'KC_Low', 'KC_Close', 'KC_EMA_7', 'KC_EMA_10',
+#          'KC_EMA_14', 'KC_WMA_5', 'KC_WMA_7', 'KC_WMA_14',
+#          'USDBR_SMA_14',  'SB_SMA_5', 'SB_WMA_7', 'CL_WMA_10',
+#          'CL_WMA_14', 'CL_SMA_10', 'ZT_EMA_10', 'KC_CCI_20', 'KC_RSI_20',
+#          'KC_TRIX_14', 'SB_TRIX_10', 'ZT_ADX_20', 'ZT_TRIX_20']]
+
+# %% - define models
+
+# Adaboost
+ada_reg = AdaBoostRegressor(n_estimators=500)
+ada_reg.fit(X_train, y_train)
+
+# Grad.Boost
+grad_reg = GradientBoostingRegressor(
+    n_estimators=50, subsample=0.8, max_depth=2, criterion="mse",
+    learning_rate=0.1)
+grad_reg.fit(X_train, y_train)
+
+
+# %% - Validation
+
+# Adaboost
+print("****************")
+print("*** Adaboost ***")
+print("****************")
+
+scores = cross_val_score(ada_reg, X_train, y_train, cv=5)
+print("Mean cross-validataion score: %.2f" % scores.mean())
+
+
+kfold = KFold(n_splits=10, shuffle=True)
+kf_cv_scores = cross_val_score(ada_reg, X_train, y_train, cv=kfold)
+print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+
+adaboost_y_pred = ada_reg.predict(x_test)
+mse_test = mean_squared_error(y_test, adaboost_y_pred)
+print("MSE: %.2f" % mse_test)
+print("RMSE: %.2f" % np.sqrt(mse_test))
+
+print("****************")
+print("****************")
+print()
+
+# Grad.Boost
+print("****************")
+print("** GradBoost ***")
+print("****************")
+
+scores = cross_val_score(grad_reg, X_train, y_train, cv=5)
+print("Mean cross-validataion score: %.2f" % scores.mean())
+
+kfold = KFold(n_splits=10, shuffle=True)
+kf_cv_scores = cross_val_score(grad_reg, X_train, y_train, cv=kfold)
+print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+
+grad_boost_y_pred = grad_reg.predict(x_test)
+mse_test = mean_squared_error(y_test, grad_boost_y_pred)
+print("MSE: %.2f" % mse_test)
+print("RMSE: %.2f" % np.sqrt(mse_test))
+
+print("****************")
+print("****************")
+print()
+
+# %%
+
+# XGBoost
+xgb_regressor = xgboost.XGBRegressor(
+    n_estimators=50, reg_lambda=0.1,
+    gamma=0.5, max_depth=2, subsample=0.9,
+    # tree_method='exact',
+)
+xgb_regressor.fit(X_train, y_train)
+
+
+# XGBoost
+print("****************")
+print("*** XGBoost ****")
+print("****************")
+
+scores = cross_val_score(xgb_regressor, X_train, y_train, cv=5)
+print("Mean cross-validataion score: %.2f" % scores.mean())
+
+kfold = KFold(n_splits=10, shuffle=True)
+kf_cv_scores = cross_val_score(xgb_regressor, X_train, y_train, cv=kfold)
+print("K-fold CV average score: %.2f" % kf_cv_scores.mean())
+
+xgb_reg_y_pred = xgb_regressor.predict(x_test)
+mse_test = mean_squared_error(y_test, xgb_reg_y_pred)
+print("MSE: %.2f" % mse_test)
+print("RMSE: %.2f" % np.sqrt(mse_test))
+
+print("****************")
+print("****************")
+print()
+
+
+# %% - Predictions
+
+x_ax = range(len(y_test))
+plt.scatter(x_ax, y_test, s=5, color="blue", label="original")
+plt.plot(x_ax, adaboost_y_pred, lw=0.8,
+         color="red", label="predicted (adaboost)")
+plt.plot(x_ax, grad_boost_y_pred, lw=0.8,
+         color="green", label="predicted (gboost)")
+plt.plot(x_ax, xgb_reg_y_pred, lw=0.8,
+         color="purple", label="predicted (xgboost)")
+plt.legend()
 plt.show()

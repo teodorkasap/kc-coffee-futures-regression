@@ -2,6 +2,7 @@ import numpy as np
 from typing import List
 import pandas as pd
 import talib
+from talib import MA_Type
 
 
 def shiftColumns(data_frame: pd.DataFrame,
@@ -218,23 +219,27 @@ def addBBands(df: pd.DataFrame,
         print('could not define column for calculating BBands for')
         return None
 
-    try:
-        upper, middle, lower = talib.BBANDS(
-            close.values,
-            timeperiod=period,
-            # number of non-biased standard deviations from the mean
-            nbdevup=stdNbr,
-            nbdevdn=stdNbr,
-            # Moving average type: simple moving average here
-            matype=0)
-    except Exception:
-        return None
+    # df['{}_upperBB'.format(commodity_name)],
+    # df['{}_middleBB'.format(commodity_name)],
+    # df['{}_lowerBB'.format(commodity_name)] = \
+    #     talib.BBANDS(close.values, timeperiod=period)
+    upper, middle, lower = talib.BBANDS(
+        close.values,
+        timeperiod=period,
+        # number of non-biased standard deviations from the mean
+        nbdevup=stdNbr,
+        nbdevdn=stdNbr,
+        # Moving average type: simple moving average here
+        matype=0)
+    df['{}_upperBB'.format(commodity_name)] = upper
+    df['{}_middleBB'.format(commodity_name)] = middle
+    df['{}_lowerBB'.format(commodity_name)] = lower
 
-    data = dict(upper=upper, middle=middle, lower=lower)
-    df_temp = pd.DataFrame(data, index=df.index, columns=[
-        '{}_upperBB'.format(commodity_name),
-        '{}_middleBB'.format(commodity_name),
-        '{}_lowerBB'.format(commodity_name)]).dropna()
 
-    df = pd.concat([df, df_temp], axis=1)
-    return df
+    # data = dict(upper=upper, middle=middle, lower=lower)
+    # df_temp = pd.DataFrame(data, index=df.index, columns=[
+    #     '{}_upperBB'.format(commodity_name),
+    #     '{}_middleBB'.format(commodity_name),
+    #     '{}_lowerBB'.format(commodity_name)]).dropna()
+
+    # df = pd.concat([df, df_temp], axis=1)
