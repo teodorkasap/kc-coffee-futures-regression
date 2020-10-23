@@ -2,8 +2,6 @@ import numpy as np
 from typing import List
 import pandas as pd
 import talib
-import talib.abstract as ta
-import datetime
 
 
 def shiftColumns(data_frame: pd.DataFrame,
@@ -207,3 +205,36 @@ def addUltOsc(dataframe: pd.DataFrame,
 
 def addWeekDay(df: pd.DataFrame, date_column: str):
     df['day_of_week'] = df.apply(lambda x: x[date_column].weekday(), axis=1)
+
+
+# Todo - to be tested
+def addBBands(df: pd.DataFrame,
+              commodity_name: str,
+              period: int,
+              stdNbr: int = 2):
+    try:
+        close = df['{}_Close'.format(commodity_name)]
+    except Exception:
+        print('could not define column for calculating BBands for')
+        return None
+
+    try:
+        upper, middle, lower = talib.BBANDS(
+            close.values,
+            timeperiod=period,
+            # number of non-biased standard deviations from the mean
+            nbdevup=stdNbr,
+            nbdevdn=stdNbr,
+            # Moving average type: simple moving average here
+            matype=0)
+    except Exception:
+        return None
+
+    data = dict(upper=upper, middle=middle, lower=lower)
+    df_temp = pd.DataFrame(data, index=df.index, columns=[
+        '{}_upperBB'.format(commodity_name),
+        '{}_middleBB'.format(commodity_name),
+        '{}_lowerBB'.format(commodity_name)]).dropna()
+
+    df = pd.concat([df, df_temp], axis=1)
+    return df

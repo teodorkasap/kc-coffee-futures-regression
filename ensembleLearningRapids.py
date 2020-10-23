@@ -12,7 +12,7 @@ import xgboost
 # own modules
 from dataLoader import getInvComData, getYahFinData
 from dataPrep import shiftColumns, addSmaEmaWma, addSinglePeriodFinFeat, \
-    addStochFast, addStochSlow, addUltOsc, addWeekDay, addBBands
+    addStochFast, addStochSlow, addUltOsc, addWeekDay
 
 
 # This is for multiple print statements per cell
@@ -155,14 +155,8 @@ addUltOsc(df, "ZF")
 addUltOsc(df, "ZC")
 addUltOsc(df, "SP")
 
-
-# %% - adding BBands
-
-df = addBBands(df, "KC", 20) # Todo - returns NaN , no value!
-
-# %%
 df.shape
-df = df.dropna()
+df.dropna()
 
 
 # %% - clear nan an infinite values
